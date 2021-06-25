@@ -1,6 +1,7 @@
 #include "chessboard.hpp"
 #include <iostream>
 #include <string>
+#include <limits>
 
 using namespace std;
 
@@ -25,23 +26,29 @@ int main() {
             cout << "Black's turn:" << endl;
             player = "black";
         }
-
         do {
             do {
-                cout << "Start space: ";
+                cout << "Enter move: ";
                 cin >> startSpace;
-                valid = chessboard.validSpace(startSpace);
+                valid = chessboard.validSpace(startSpace, 0);
+                if(!valid) {
+                    cin.clear();
+                    cin.ignore(numeric_limits<std::streamsize>::max(), '\n');
+                }
             }
             while(!valid);
-
             do {
-                cout << "End space: ";
                 cin >> endSpace;
-                valid = chessboard.validSpace(endSpace);
+                valid = chessboard.validSpace(endSpace, 1);
+                if(!valid) {
+                    cin.clear();
+                    cin.ignore(numeric_limits<std::streamsize>::max(), '\n');
+                }
             }
             while(!valid);
-
             valid = chessboard.move(player, startSpace, endSpace);
+            cin.clear();
+            cin.ignore(numeric_limits<std::streamsize>::max(), '\n');
         }
         while(!valid);
         cout<<endl;

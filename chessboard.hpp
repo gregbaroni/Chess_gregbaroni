@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <string>
+#include <map>
 #include <vector>
 #include <utility>
 
@@ -12,26 +13,26 @@ struct Piece {
     Piece(std::string c, std::string t) {
         color = c;
         type = t;
-        std::vector<std::pair <int,int>> v;
+        std::map<std::pair <int,int>, int> v;
         validMoves = v;
     }
     std::string color;
     std::string type;
-    std::vector<std::pair <int,int>> validMoves;
     // validMoves stores the spaces that the piece can move to
+    std::map<std::pair <int,int>, int> validMoves;
 };
 
 // Class to represent the chessboard
 class Chessboard {
 private:
     Piece* board[8][8];
-    std::vector<std::pair <int,int>> whiteValidMoves;
-    std::vector<std::pair <int,int>> blackValidMoves;
-    /* whiteValidMoves and blackValidMoves store the spaces that the white pieces
-     and black pieces can move to */
+    /* whiteValidCaptures and blackValidCaptures store the spaces that the white pieces
+     and black pieces can move to and capture pieces */
+    std::map<std::pair <int,int>, int> whiteValidCaptures;
+    std::map<std::pair <int,int>, int> blackValidCaptures;
+    // whiteKingPos and blackKingPos store the positions of the kings
     std::pair<int,int> whiteKingPos;
     std::pair<int,int> blackKingPos;
-    /* whiteKingPos and blackKingPos store the positions of the kings */
     bool isWhiteInCheck;
     bool isBlackInCheck;
     bool isWhiteInCheckmate;
@@ -39,11 +40,12 @@ private:
     bool isStalemate;
     
     void addPiece(std::string color, std::string type, int xcord, int ycord);
+    void validCapture(Piece* p, int x, int y);
     int convertToNumber(char c);
 public:
     Chessboard();
     void printBoard();
-    bool validSpace(std::string space);
+    bool validSpace(std::string space, int s);
     bool move(std::string player, std::string startSpace, std::string endSpace);
     void calculateValidMoves();
     bool getIsWhiteInCheckmate();

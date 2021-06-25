@@ -7,10 +7,10 @@ Chessboard::Chessboard() {
     isWhiteInCheckmate = false;
     isBlackInCheckmate = false;
 
-    std::vector<std::pair <int,int>> v1;
-    std::vector<std::pair <int,int>> v2;
-    whiteValidMoves = v1;
-    blackValidMoves = v2;
+    std::map<std::pair <int,int>, int> v1;
+    std::map<std::pair <int,int>, int> v2;
+    whiteValidCaptures = v1;
+    blackValidCaptures = v2;
 
     for(int i = 0; i < 8; i++) {
         for(int j = 0; j<8; j++) {
@@ -75,7 +75,7 @@ void Chessboard::printBoard() {
                     else if(p.type == "queen") {
                         std::cout << " q ";
                     }
-                    else {
+                    else if(p.type == "king") {
                         std::cout << " k ";
                     }
                 }
@@ -95,7 +95,7 @@ void Chessboard::printBoard() {
                     else if(p.type == "queen") {
                         std::cout << " Q ";
                     }
-                    else {
+                    else if(p.type == "king") {
                         std::cout << " K ";
                     }
                 }
@@ -114,25 +114,48 @@ void Chessboard::printBoard() {
 
 // Checks to see if the user inputted space is a valid space
 // A valid space is a letter between a and h, followed by a number between 1 and 8
-bool Chessboard::validSpace(std::string space) {
+// s is 0 when it is checking a start space and s is 1 when it is checking an end space
+bool Chessboard::validSpace(std::string space, int s) {
     if(space.length() != 2) {
-        std::cout << "Invalid space syntax: space should be two characters long" << std::endl;;
+        std::cout << "Invalid ";
+        if(s) {
+            std::cout << "end ";
+        }
+        else {
+            std::cout << "start ";
+        }
+        std::cout << "space syntax: space should be two characters long" << std::endl;
         return false;
     }
     std::string alphabet = "abcdefgh";
     char c = space[0];
     if(alphabet.find(c) == std::string::npos) {
-        std::cout << "Invalid space syntax: first character of the space should be a letter between a and h" << std::endl;
+        std::cout << "Invalid ";
+        if(s) {
+            std::cout << "end ";
+        }
+        else {
+            std::cout << "start ";
+        }
+        std::cout << "space syntax: first character of the space should be a letter between a and h" << std::endl;
         return false;
     }
     std::string numbers = "12345678";
     char n = space[1];
     if(numbers.find(n) == std::string::npos) {
-        std::cout << "Invalid space syntax: second character of the space should be a number between 1 and 8" << std::endl;
+        std::cout << "Invalid ";
+        if(s) {
+            std::cout << "end ";
+        }
+        else {
+            std::cout << "start ";
+        }
+        std::cout << "space syntax: second character of the space should be a number between 1 and 8" << std::endl;
         return false;
     }
     return true;
 }
+
 
 // Function for carrying out a player's move
 bool Chessboard::move(std::string player, std::string startSpace, std::string endSpace) {
@@ -143,7 +166,22 @@ bool Chessboard::move(std::string player, std::string startSpace, std::string en
     x_startSpace = convertToNumber(startSpace[0]);
     x_endSpace = convertToNumber(endSpace[0]);
 
-    // TODO: check to see if the move is valid
+    Piece* p = board[x_startSpace][y_startSpace];
+    std::pair<int,int> move;
+    move = std::make_pair(x_endSpace, y_endSpace);
+
+    if(p == nullptr) {
+        std::cout << "Illegal move: there is no piece on that square" << std::endl;
+        return false;
+    }
+    if(p->color != player) {
+        std::cout << "Illegal move: that piece does not belong to you" << std::endl;
+        return false;
+    }
+    if(p->validMoves.find(move) == p->validMoves.end()) {
+        std::cout << "Illegal move: that piece is unable to move to that space" << std::endl;
+        return false;
+    }
 
     board[x_endSpace][y_endSpace] = board[x_startSpace][y_startSpace];
     board[x_startSpace][y_startSpace] = nullptr;
@@ -158,9 +196,254 @@ bool Chessboard::move(std::string player, std::string startSpace, std::string en
 // Function that recalculates the valid moves
 // Called at the start of the match, and after every move
 void Chessboard::calculateValidMoves() {
+    whiteValidCaptures.clear();
+    blackValidCaptures.clear();
+    Piece* p;
+    for(int i = 0; i < 8; i++) {
+        for(int j = 0; j < 8; j++) {
+            if(board[i][j] != nullptr) {
+                p = board[i][j];
+                p->validMoves.clear();
+                if(p->type == "pawn") {
+                    if(p->color == "white") {
+                        if(j+1 < 8 && board[i][j+1] == nullptr) {
+                            p->validMoves[std::make_pair(i,j+1)] = 1;
+                        }
+                        if(j+1 < 8 && i+1 < 8 && board[i+1][j+1] != nullptr && board[i+1][j+1]->color == "black") {
+                            p->validMoves[std::make_pair(i+1,j+1)] = 1;
+                            whiteValidCaptures[std::make_pair(i+1,j+1)] = 1;                          
+                        }
+                        if(j+1 < 8 && i-1 >= 0 && board[i-1][j+1] != nullptr && board[i-1][j+1]->color == "black") {
+                            p->validMoves[std::make_pair(i-1,j+1)] = 1;
+                            whiteValidCaptures[std::make_pair(i-1,j+1)] = 1;                                
+                        }
+                    }
+                    else {
+                        if(j-1 >= 0 && board[i][j-1] == nullptr) {
+                            p->validMoves[std::make_pair(i,j-1)] = 1;
+                        }
+                        if(j-1 >= 0 && i+1 < 8 && board[i+1][j-1] != nullptr && board[i+1][j-1]->color == "white") {
+                            p->validMoves[std::make_pair(i+1,j-1)] = 1;
+                            blackValidCaptures[std::make_pair(i+1,j-1)] = 1;                          
+                        }
+                        if(j-1 >= 0 && i-1 >= 0 && board[i-1][j-1] != nullptr && board[i-1][j-1]->color == "white") {
+                            p->validMoves[std::make_pair(i-1,j-1)] = 1;
+                            blackValidCaptures[std::make_pair(i-1,j-1)] = 1;                                
+                        }
+                    }
+                    // TODO: Implement moving two spaces forward as first move and en passant
+                }
+                else if(p->type == "rook") {
+                    // Vertical movement
+                    int y = j+1;
+                    while(y < 8 && board[i][y] == nullptr) {
+                        p->validMoves[std::make_pair(i,y)] = 1;
+                        y++;
+                    }
+                    if(y < 8) {
+                        validCapture(p,i,y);
+                    }
+                    y = j-1;
+                    while(y >= 0 && board[i][y] == nullptr) {
+                        p->validMoves[std::make_pair(i,y)] = 1;
+                        y--;
+                    }
+                    if(y >= 0) {
+                        validCapture(p,i,y);
+                    }
+                    // Horizontal movement
+                    int x = i+1;
+                    while(x < 8 && board[x][j] == nullptr) {
+                        p->validMoves[std::make_pair(x,j)] = 1;
+                        x++;
+                    }
+                    if(x < 8) {
+                        validCapture(p,x,j);
+                    }
+                    x = i-1;
+                    while(x >= 0 && board[x][j] == nullptr) {
+                        p->validMoves[std::make_pair(x,j)] = 1;
+                        x--;
+                    }
+                    if(x >= 0) {
+                        validCapture(p,x,j);
+                    }
+                }
+                else if(p->type == "knight") {
+                    int x, y;
+                    std::vector<std::pair<int,int>> v;
+                    v.push_back(std::make_pair(i-1,j+2));
+                    v.push_back(std::make_pair(i+1,j+2));
+                    v.push_back(std::make_pair(i-1,j-2));
+                    v.push_back(std::make_pair(i+1,j-2));
+                    v.push_back(std::make_pair(i+2,j-1));
+                    v.push_back(std::make_pair(i+2,j+1));
+                    v.push_back(std::make_pair(i-2,j-1));
+                    v.push_back(std::make_pair(i-2,j+1));
+                    for(int k = 0; k < v.size(); k++) {
+                        x = v[k].first;
+                        y = v[k].second;
+                        if(x >= 0 && x < 8 && y >= 0 && y < 8) {
+                            if(board[x][y] == nullptr) {
+                                p->validMoves[std::make_pair(x,y)] = 1;
+                            }
+                            else {
+                                validCapture(p,x,y);
+                            }
+                        }
+                    }
+                }
+                else if(p->type == "bishop") {
+                    // 45 degree angle movement
+                    int x = i+1;
+                    int y = j+1;
+                    while(x < 8 && y < 8 && board[x][y] == nullptr) {
+                        p->validMoves[std::make_pair(x,y)] = 1;
+                        x++;
+                        y++;
+                    }
+                    if(x < 8 && y < 8) {
+                        validCapture(p,x,y);
+                    }
+                    x = i-1;
+                    y = j-1;
+                    while(x >= 0 && y >= 0 && board[x][y] == nullptr) {
+                        p->validMoves[std::make_pair(x,y)] = 1;
+                        x--;
+                        y--;
+                    }
+                    if(x >= 0 && y >= 0) {
+                        validCapture(p,x,y);
+                    }
+                    // 135 degree angle movment
+                    x = i+1;
+                    y = j-1;
+                    while(x < 8 && y >= 0 && board[x][y] == nullptr) {
+                        p->validMoves[std::make_pair(x,y)] = 1;
+                        x++;
+                        y--;
+                    }
+                    if(x < 8 && y >= 0) {
+                        validCapture(p,x,y);
+                    }
+                    x = i-1;
+                    y = j+1;
+                    while(x >= 0 && y < 8 && board[x][y] == nullptr) {
+                        p->validMoves[std::make_pair(x,y)] = 1;
+                        x--;
+                        y++;
+                    }
+                    if(x >= 0 && y < 8) {
+                        validCapture(p,x,y);
+                    }
+                }
+                else if(p->type == "queen") {
+                    // Vertical movement
+                    int y = j+1;
+                    while(y < 8 && board[i][y] == nullptr) {
+                        p->validMoves[std::make_pair(i,y)] = 1;
+                        y++;
+                    }
+                    if(y < 8) {
+                        validCapture(p,i,y);
+                    }
+                    y = j-1;
+                    while(y >= 0 && board[i][y] == nullptr) {
+                        p->validMoves[std::make_pair(i,y)] = 1;
+                        y--;
+                    }
+                    if(y >= 0) {
+                        validCapture(p,i,y);
+                    }
+                    // Horizontal movement
+                    int x = i+1;
+                    while(x < 8 && board[x][j] == nullptr) {
+                        p->validMoves[std::make_pair(x,j)] = 1;
+                        x++;
+                    }
+                    if(x < 8) {
+                        validCapture(p,x,j);
+                    }
+                    x = i-1;
+                    while(x >= 0 && board[x][j] == nullptr) {
+                        p->validMoves[std::make_pair(x,j)] = 1;
+                        x--;
+                    }
+                    if(x >= 0) {
+                        validCapture(p,x,j);
+                    }
+                    // 45 degree angle movement
+                    x = i+1;
+                    y = j+1;
+                    while(x < 8 && y < 8 && board[x][y] == nullptr) {
+                        p->validMoves[std::make_pair(x,y)] = 1;
+                        x++;
+                        y++;
+                    }
+                    if(x < 8 && y < 8) {
+                        validCapture(p,x,y);
+                    }
+                    x = i-1;
+                    y = j-1;
+                    while(x >= 0 && y >= 0 && board[x][y] == nullptr) {
+                        p->validMoves[std::make_pair(x,y)] = 1;
+                        x--;
+                        y--;
+                    }
+                    if(x >= 0 && y >= 0) {
+                        validCapture(p,x,y);
+                    }
+                    // 135 degree angle movment
+                    x = i+1;
+                    y = j-1;
+                    while(x < 8 && y >= 0 && board[x][y] == nullptr) {
+                        p->validMoves[std::make_pair(x,y)] = 1;
+                        x++;
+                        y--;
+                    }
+                    if(x < 8 && y >= 0) {
+                        validCapture(p,x,y);
+                    }
+                    x = i-1;
+                    y = j+1;
+                    while(x >= 0 && y < 8 && board[x][y] == nullptr) {
+                        p->validMoves[std::make_pair(x,y)] = 1;
+                        x--;
+                        y++;
+                    }
+                    if(x >= 0 && y < 8) {
+                        validCapture(p,x,y);
+                    }
+                }
+                else if(p->type == "king") {
+                    int x, y;
+                    std::vector<std::pair<int,int>> v;
+                    v.push_back(std::make_pair(i,j+1));
+                    v.push_back(std::make_pair(i,j-1));
+                    v.push_back(std::make_pair(i+1,j));
+                    v.push_back(std::make_pair(i-1,j));
+                    v.push_back(std::make_pair(i+1,j+1));
+                    v.push_back(std::make_pair(i+1,j-1));
+                    v.push_back(std::make_pair(i-1,j+1));
+                    v.push_back(std::make_pair(i-1,j-1));
+                    for(int k = 0; k < v.size(); k++) {
+                        x = v[k].first;
+                        y = v[k].second;
+                        if(x >= 0 && x < 8 && y >= 0 && y < 8) {
+                            if(board[x][y] == nullptr) {
+                                p->validMoves[std::make_pair(x,y)] = 1;
+                            }
+                            else {
+                                validCapture(p,x,y);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    //TODO: update check flags and checkmate flags
 
-    // TODO: Need to store the valid moves of each piece to see if a move is valid
-    //       and the valid moves for each player to see if there is a stalemate, checkmate, etc.
     return;
 }
 
@@ -186,6 +469,19 @@ bool Chessboard::getIsStalemate() {
 void Chessboard::addPiece(std::string color, std::string type, int xcord, int ycord) {
     Piece* p = new Piece(color, type);
     board[xcord][ycord] = p;
+}
+
+// Sees if a capture is valid and, if so, adds it to the validMoves and validCaptures maps
+void Chessboard::validCapture(Piece* p, int x, int y) {
+    if(board[x][y]->color != p->color) {
+        p->validMoves[std::make_pair(x,y)] = 1;
+        if(p->color == "white") {
+            whiteValidCaptures[std::make_pair(x,y)] = 1;
+        }
+        else {
+            blackValidCaptures[std::make_pair(x,y)] = 1;
+        }
+    }    
 }
 
 // Converts a letter between a and h to its corresponding index on the chessboard
