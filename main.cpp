@@ -21,10 +21,16 @@ int main() {
         if(turnCounter % 2 == 1) {
             cout << "White's turn:" << endl;
             player = "white";
+            if(chessboard.getIsWhiteInCheck()) {
+                cout << "White is in Check" << endl;
+            }
         }
         else {
             cout << "Black's turn:" << endl;
             player = "black";
+            if(chessboard.getIsBlackInCheck()) {
+                cout << "Black is in Check" << endl;
+            }
         }
         do {
             do {
@@ -52,6 +58,17 @@ int main() {
         }
         while(!valid);
         cout<<endl;
+    }
+    chessboard.printBoard();
+    cout << endl;
+    if(chessboard.getIsWhiteInCheckmate()) {
+        cout << "Black wins!" << endl;
+    }
+    else if(chessboard.getIsBlackInCheckmate()) {
+        cout << "White wins!" << endl;
+    }
+    else if(chessboard.getIsStalemate()) {
+        cout << "Stalemate" << endl;
     }
 
     return 0;

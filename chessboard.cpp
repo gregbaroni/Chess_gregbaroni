@@ -6,6 +6,7 @@ Chessboard::Chessboard() {
     isBlackInCheck = false;
     isWhiteInCheckmate = false;
     isBlackInCheckmate = false;
+    isStalemate = false;
 
     std::map<std::pair <int,int>, int> v1;
     std::map<std::pair <int,int>, int> v2;
@@ -44,6 +45,9 @@ Chessboard::Chessboard() {
 
     std::pair <int,int> whiteKing(4,0);
     std::pair <int,int> blackKing(4,7);
+
+    whiteKingPos = whiteKing;
+    blackKingPos = blackKing;
 
     calculateValidMoves();
 }
@@ -183,13 +187,58 @@ bool Chessboard::move(std::string player, std::string startSpace, std::string en
         return false;
     }
 
+    Piece* temp = board[x_endSpace][y_endSpace];
+    bool wasWhiteInCheck = isWhiteInCheck;
+    bool wasBlackInCheck = isBlackInCheck;
+
     board[x_endSpace][y_endSpace] = board[x_startSpace][y_startSpace];
     board[x_startSpace][y_startSpace] = nullptr;
+    if(p->type == "king") {
+        if(player == "white") {
+            whiteKingPos = move;
+        }
+        else {
+            blackKingPos = move;
+        }
+    }
 
     calculateValidMoves();
 
-    // TODO: check to see if the valid move causes an invalid gamestate, such as player's king now being in check
-    
+    if(player == "white") {
+        if(isWhiteInCheck) {
+            if(wasWhiteInCheck) {
+                std::cout << "Illegal move: your king is in Check" << std::endl;
+            }
+            else {
+                std::cout << "Illegal move: that move puts your king in Check" << std::endl;
+            }
+            board[x_endSpace][y_endSpace] = temp;
+            board[x_startSpace][y_startSpace] = p;
+            if(p->type == "king") {
+                whiteKingPos = std::make_pair(x_startSpace, y_startSpace);
+            }
+            calculateValidMoves();
+            return false;
+        }
+    }
+    else {
+        if(isBlackInCheck) {
+            if(wasBlackInCheck) {
+                std::cout << "Illegal move: your king is in Check" << std::endl;
+            }
+            else {
+                std::cout << "Illegal move: that move puts your king in Check" << std::endl;
+            }
+            board[x_endSpace][y_endSpace] = temp;
+            board[x_startSpace][y_startSpace] = p;
+            if(p->type == "king") {
+                blackKingPos = std::make_pair(x_startSpace, y_startSpace);
+            }
+            calculateValidMoves();
+            return false;
+        }
+    }
+
     return true;
 }
 
@@ -209,6 +258,9 @@ void Chessboard::calculateValidMoves() {
                         if(j+1 < 8 && board[i][j+1] == nullptr) {
                             p->validMoves[std::make_pair(i,j+1)] = 1;
                         }
+                        if(j == 1 && board[i][j+1] == nullptr && board[i][j+2] == nullptr) {
+                            p->validMoves[std::make_pair(i,j+2)] = 1;
+                        }
                         if(j+1 < 8 && i+1 < 8 && board[i+1][j+1] != nullptr && board[i+1][j+1]->color == "black") {
                             p->validMoves[std::make_pair(i+1,j+1)] = 1;
                             whiteValidCaptures[std::make_pair(i+1,j+1)] = 1;                          
@@ -222,6 +274,9 @@ void Chessboard::calculateValidMoves() {
                         if(j-1 >= 0 && board[i][j-1] == nullptr) {
                             p->validMoves[std::make_pair(i,j-1)] = 1;
                         }
+                        if(j == 6 && board[i][j-1] == nullptr && board[i][j-2] == nullptr) {
+                            p->validMoves[std::make_pair(i,j-2)] = 1;
+                        }
                         if(j-1 >= 0 && i+1 < 8 && board[i+1][j-1] != nullptr && board[i+1][j-1]->color == "white") {
                             p->validMoves[std::make_pair(i+1,j-1)] = 1;
                             blackValidCaptures[std::make_pair(i+1,j-1)] = 1;                          
@@ -231,7 +286,8 @@ void Chessboard::calculateValidMoves() {
                             blackValidCaptures[std::make_pair(i-1,j-1)] = 1;                                
                         }
                     }
-                    // TODO: Implement moving two spaces forward as first move and en passant
+                    // TODO: Implement en passant
+                    // TODO: Implement pawn reaching end of the board
                 }
                 else if(p->type == "rook") {
                     // Vertical movement
@@ -438,15 +494,53 @@ void Chessboard::calculateValidMoves() {
                             }
                         }
                     }
+
+                    //TODO: Implement castling
                 }
             }
         }
     }
-    //TODO: update check flags and checkmate flags
+    if(whiteValidCaptures.find(blackKingPos) != whiteValidCaptures.end()) {
+        isBlackInCheck = true;
+    }
+    else {
+        isBlackInCheck = false;
+    }
+    if(blackValidCaptures.find(whiteKingPos) != blackValidCaptures.end()) {
+        isWhiteInCheck = true;
+    }
+    else {
+        isWhiteInCheck = false;
+    }
+
+    // check each valid move to see if it places king in check
+    if(isWhiteInCheck) {
+
+    }
+    else {
+        isWhiteInCheckmate = false;
+    }
+    if(isBlackInCheck) {
+
+    }
+    else {
+        isBlackInCheckmate = false;
+    }
+
+    //TODO: implement checking if there is a checkmate or stalemate
 
     return;
 }
 
+// Getter for isWhiteInCheck
+bool Chessboard::getIsWhiteInCheck() {
+    return isWhiteInCheck;
+}
+
+// Getter for isBlackInCheck
+bool Chessboard::getIsBlackInCheck() {
+    return isBlackInCheck;
+}
 
 // Getter for isWhiteInCheckmate
 bool Chessboard::getIsWhiteInCheckmate() {

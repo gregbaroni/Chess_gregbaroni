@@ -48,6 +48,8 @@ public:
     bool validSpace(std::string space, int s);
     bool move(std::string player, std::string startSpace, std::string endSpace);
     void calculateValidMoves();
+    bool getIsWhiteInCheck();
+    bool getIsBlackInCheck();
     bool getIsWhiteInCheckmate();
     bool getIsBlackInCheckmate();
     bool getIsStalemate();
