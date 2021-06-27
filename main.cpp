@@ -62,9 +62,11 @@ int main() {
     chessboard.printBoard();
     cout << endl;
     if(chessboard.getIsWhiteInCheckmate()) {
+        cout << "Checkmate" << endl;
         cout << "Black wins!" << endl;
     }
     else if(chessboard.getIsBlackInCheckmate()) {
+        cout << "Checkmate" << endl;
         cout << "White wins!" << endl;
     }
     else if(chessboard.getIsStalemate()) {
