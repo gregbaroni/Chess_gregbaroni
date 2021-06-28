@@ -16,7 +16,6 @@ Chessboard::Chessboard() {
     for(int i = 0; i < 8; i++) {
         for(int j = 0; j<8; j++) {
             board[i][j] = nullptr;
-            tempBoard[i][j] = nullptr;
         }
     }
 
@@ -56,7 +55,6 @@ Chessboard::Chessboard() {
 // Destructor for chessboard
 Chessboard::~Chessboard() {
     deleteBoard();
-    deleteTempBoard();
 }
 
 // Copy constructor for chessboard
@@ -88,25 +86,11 @@ Chessboard::Chessboard(const Chessboard& source) {
             }
         }
     }
-    for(int i = 0; i < 8; i++) {
-        for(int j = 0; j < 8; j++) {
-            if(source.tempBoard[i][j] == nullptr) {
-                tempBoard[i][j] == nullptr;
-            }
-            else {
-                color = source.tempBoard[i][j]->color;
-                type = source.tempBoard[i][j]->type;
-                Piece* p = new Piece(color, type, source.board[i][j]->validMoves);
-                tempBoard[i][j] = p;
-            }
-        }
-    }
 }
 
 // Copy assignment operator for chessboard
 Chessboard& Chessboard::operator=(const Chessboard& source) {
     deleteBoard();
-    deleteTempBoard();
     isWhiteInCheck = source.isWhiteInCheck;
     isBlackInCheck = source.isBlackInCheck;
     isWhiteInCheckmate = source.isWhiteInCheckmate;
@@ -131,19 +115,6 @@ Chessboard& Chessboard::operator=(const Chessboard& source) {
                 type = source.board[i][j]->type;
                 Piece* p = new Piece(color, type, source.board[i][j]->validMoves);
                 board[i][j] = p;
-            }
-        }
-    }
-    for(int i = 0; i < 8; i++) {
-        for(int j = 0; j < 8; j++) {
-            if(source.tempBoard[i][j] == nullptr) {
-                tempBoard[i][j] == nullptr;
-            }
-            else {
-                color = source.tempBoard[i][j]->color;
-                type = source.tempBoard[i][j]->type;
-                Piece* p = new Piece(color, type, source.board[i][j]->validMoves);
-                tempBoard[i][j] = p;
             }
         }
     }
@@ -293,17 +264,17 @@ bool Chessboard::move(std::string player, std::string startSpace, std::string en
 
     std::string color;
     std::string type;
-    Piece* tempBoard2[8][8];
+    Piece* tempBoard[8][8];
     for(int i = 0; i < 8; i++) {
         for(int j = 0; j < 8; j++) {
             if(board[i][j] == nullptr) {
-                tempBoard2[i][j] == nullptr;
+                tempBoard[i][j] == nullptr;
             }
             else {
                 color = board[i][j]->color;
                 type = board[i][j]->type;
-                Piece* p = new Piece(color, type, board[i][j]->validMoves);
-                tempBoard2[i][j] = p;
+                Piece* p2 = new Piece(color, type, board[i][j]->validMoves);
+                tempBoard[i][j] = p2;
             }
         }
     }
@@ -318,7 +289,7 @@ bool Chessboard::move(std::string player, std::string startSpace, std::string en
         }
     }
 
-    calculateBoardState();
+    calculateBoardState(player);
 
     if(player == "white") {
         if(isWhiteInCheck) {
@@ -340,15 +311,18 @@ bool Chessboard::move(std::string player, std::string startSpace, std::string en
             blackValidCaptures = tempBlackValidCaptures;
             for(int i = 0; i < 8; i++) {
                 for(int j = 0; j < 8; j++) {
-                    if(tempBoard2[i][j] == nullptr) {
+                    if(tempBoard[i][j] == nullptr) {
                         board[i][j] == nullptr;
                     }
                     else {
-                        color = tempBoard2[i][j]->color;
-                        type = tempBoard2[i][j]->type;
-                        Piece* p = new Piece(color, type, tempBoard[i][j]->validMoves);
-                        board[i][j] = p;
-                        delete tempBoard2[i][j];
+                        color = tempBoard[i][j]->color;
+                        type = tempBoard[i][j]->type;
+                        Piece* p3 = new Piece(color, type, tempBoard[i][j]->validMoves);
+                        if(board[i][j] != nullptr) {
+                            delete board[i][j];
+                        }
+                        board[i][j] = p3;
+                        delete tempBoard[i][j];
                     }
                 }
             }
@@ -375,15 +349,18 @@ bool Chessboard::move(std::string player, std::string startSpace, std::string en
             blackValidCaptures = tempBlackValidCaptures;
             for(int i = 0; i < 8; i++) {
                 for(int j = 0; j < 8; j++) {
-                    if(tempBoard2[i][j] == nullptr) {
+                    if(tempBoard[i][j] == nullptr) {
                         board[i][j] == nullptr;
                     }
                     else {
-                        color = tempBoard2[i][j]->color;
-                        type = tempBoard2[i][j]->type;
-                        Piece* p = new Piece(color, type, tempBoard[i][j]->validMoves);
-                        board[i][j] = p;
-                        delete tempBoard2[i][j];
+                        color = tempBoard[i][j]->color;
+                        type = tempBoard[i][j]->type;
+                        Piece* p3 = new Piece(color, type, tempBoard[i][j]->validMoves);
+                        if(board[i][j] != nullptr) {
+                            delete board[i][j];
+                        }
+                        board[i][j] = p3;
+                        delete tempBoard[i][j];
                     }
                 }
             }
@@ -407,9 +384,10 @@ bool Chessboard::move(std::string player, std::string startSpace, std::string en
 // Function that recalculates the valid moves for each piece
 // and checks to see if there is a checkmate, stalemenate, etc.
 // Called after every move
-void Chessboard::calculateBoardState() {
+void Chessboard::calculateBoardState(std::string player) {
+    std::cout<<"calculate Board State" << std::endl;
     calculateValidMoves();
-    calculateKingStates();
+    calculateKingStates(player);
 }
 
 // Function that recalculates the valid moves
@@ -676,7 +654,8 @@ void Chessboard::calculateValidMoves() {
 
 // Checks to see if the kings are in check, checkmate, or if there is a stalemate
 // Called after every move by calculateBoardState
-void Chessboard::calculateKingStates() {
+void Chessboard::calculateKingStates(std::string player) {
+    std::cout<<"calculate King States" << std::endl;
     if(whiteValidCaptures.find(blackKingPos) != whiteValidCaptures.end()) {
         isBlackInCheck = true;
     }
@@ -691,113 +670,156 @@ void Chessboard::calculateKingStates() {
     }
 
     // Check each valid move to see if it places king in check
-    bool moveExists = false;
+    bool moveExistsForWhite = false;
+    bool moveExistsForBlack = false;
     Piece* p;
     Piece* temp;
+    Piece* tempBoard[8][8];
+    for(int i = 0; i < 8; i++) {
+        for(int j = 0; j < 8; j++) {
+            tempBoard[i][j] = nullptr;
+        }
+    }    
+    std::string color;
+    std::string type;
     bool wasWhiteInCheck;
     bool wasBlackInCheck;
     std::map<std::pair <int,int>, int> tempWhiteValidCaptures;
     std::map<std::pair <int,int>, int> tempBlackValidCaptures;
     std::map<std::pair <int,int>, int> moves;
-    if(isWhiteInCheck) {
-        for(int i = 0; i < 8; i++) {
-            for(int j = 0; j < 8; j++) {
-                if(!moveExists && board[i][j] != nullptr && board[i][j]->color == "white") {
-                    p = board[i][j];
-                    moves = p->validMoves;
-                    for(std::map<std::pair <int,int>, int>::iterator it = p->validMoves.begin(); it != p->validMoves.end(); it++) {
-                        temp = board[it->first.first][it->first.second];
-                        wasWhiteInCheck = isWhiteInCheck;
-                        wasBlackInCheck = isBlackInCheck;
-                        tempWhiteValidCaptures = whiteValidCaptures;
-                        tempBlackValidCaptures = blackValidCaptures;
-                        copyBoardToTemp();
+    for(int i = 0; i < 8; i++) {
+        for(int j = 0; j < 8; j++) {
+            if(board[i][j] != nullptr && ((!moveExistsForWhite && board[i][j]->color == "white") || (!moveExistsForBlack && board[i][j]->color == "black"))) {
+                std::cout << "piece at: " << i << " " << j << std::endl;                
+                p = board[i][j];
+                moves = p->validMoves;
+                for(std::map<std::pair <int,int>, int>::iterator it = moves.begin(); it != moves.end(); it++) {
+                    std::cout << it->first.first << " " << it->first.second << std::endl;
+                    temp = board[it->first.first][it->first.second];
+                    wasWhiteInCheck = isWhiteInCheck;
+                    wasBlackInCheck = isBlackInCheck;
+                    tempWhiteValidCaptures = whiteValidCaptures;
+                    tempBlackValidCaptures = blackValidCaptures;
 
-                        board[it->first.first][it->first.second] = board[i][j];
-                        board[i][j] = nullptr;
-                        if(p->type == "king") {
+                    for(int k = 0; k < 8; k++) {
+                        for(int l = 0; l < 8; l++) {
+                            if(board[k][l] == nullptr) {
+                                tempBoard[k][l] == nullptr;
+                            }
+                            else {
+                                color = board[k][l]->color;
+                                type = board[k][l]->type;
+                                /*
+                                std::cout << "ALLOCATING " << k << " " << l << " :" << type <<std::endl;
+                                std::cout << board[k][l]->validMoves.size() << std::endl;
+                                */
+                                Piece* p2 = new Piece(color, type, board[k][l]->validMoves);
+                                tempBoard[k][l] = p2;
+                            }
+                        }
+                    }
+                    board[it->first.first][it->first.second] = board[i][j];
+                    board[i][j] = nullptr;
+                    if(p->type == "king") {
+                        if(p->color == "white") {
                             whiteKingPos = std::make_pair(it->first.first, it->first.second);
                         }
-
-                        calculateValidMoves();
-
-                        if(!isWhiteInCheck) {
-                            moveExists = true;
+                        else {
+                            blackKingPos = std::make_pair(it->first.first, it->first.second);
                         }
+                    }
 
-                        board[it->first.first][it->first.second] = temp;
-                        board[i][j] = p;
+                    calculateValidMoves();
 
+                    if(p->color == "white") {
+                        if(!isWhiteInCheck) {
+                            moveExistsForWhite = true;
+                        }
                         if(p->type == "king") {
                             whiteKingPos = std::make_pair(i, j);
                         }
-                        isWhiteInCheck = wasWhiteInCheck;
-                        isBlackInCheck = wasBlackInCheck;
-                        whiteValidCaptures = tempWhiteValidCaptures;
-                        blackValidCaptures = tempBlackValidCaptures;
-                        replaceBoardWithTemp();
                     }
-                }
-            }
-        }
-        if(!moveExists) {
-            isWhiteInCheckmate = true;
-        }
-    }
-    else {
-        isWhiteInCheckmate = false;
-    }
-    if(isBlackInCheck) {
-        for(int i = 0; i < 8; i++) {
-            for(int j = 0; j < 8; j++) {
-                if(!moveExists && board[i][j] != nullptr && board[i][j]->color == "black") {
-                    p = board[i][j];
-                    moves = p->validMoves;
-                    for(std::map<std::pair <int,int>, int>::iterator it = moves.begin(); it != moves.end(); it++) {
-                        temp = board[it->first.first][it->first.second];
-                        wasWhiteInCheck = isWhiteInCheck;
-                        wasBlackInCheck = isBlackInCheck;
-                        tempWhiteValidCaptures = whiteValidCaptures;
-                        tempBlackValidCaptures = blackValidCaptures;
-                        copyBoardToTemp();
-
-                        board[it->first.first][it->first.second] = board[i][j];
-                        board[i][j] = nullptr;
-                        if(p->type == "king") {
-                            blackKingPos = std::make_pair(it->first.first, it->first.second);
-                        }
-
-                        calculateValidMoves();
-
+                    else {
                         if(!isBlackInCheck) {
-                            moveExists = true;
+                            moveExistsForBlack = true;
                         }
-
-                        board[it->first.first][it->first.second] = temp;
-                        board[i][j] = p;
-
                         if(p->type == "king") {
                             blackKingPos = std::make_pair(i, j);
                         }
-                        isWhiteInCheck = wasWhiteInCheck;
-                        isBlackInCheck = wasBlackInCheck;
-                        whiteValidCaptures = tempWhiteValidCaptures;
-                        blackValidCaptures = tempBlackValidCaptures;
-                        replaceBoardWithTemp();
                     }
+
+                    board[it->first.first][it->first.second] = temp;
+                    board[i][j] = p;
+
+                    isWhiteInCheck = wasWhiteInCheck;
+                    isBlackInCheck = wasBlackInCheck;
+                    whiteValidCaptures = tempWhiteValidCaptures;
+                    blackValidCaptures = tempBlackValidCaptures;
+                    
+                    for(int k = 0; k < 8; k++) {
+                        for(int l = 0; l < 8; l++) {
+                            if(tempBoard[k][l] == nullptr) {
+                                if(board[k][l] != nullptr) {
+                                    delete board[k][l];
+                                }
+                                board[k][l] == nullptr;
+                            }
+                            else {
+                                color = tempBoard[k][l]->color;
+                                type = tempBoard[k][l]->type;
+                                /*
+                                std::cout << "ALLOCATING " << k << " " << l << " :" << type <<std::endl;
+                                std::cout << board[k][l]->validMoves.size() << std::endl;
+                                */
+                                Piece* p3 = new Piece(color, type, tempBoard[k][l]->validMoves);
+                                if(board[k][l] != nullptr) {
+                                    delete board[k][l];
+                                }
+                                board[k][l] = p3;
+                                delete tempBoard[k][l];
+                                tempBoard[k][l] = nullptr;
+                            }
+                        }
+                    }
+                                      
                 }
             }
         }
-        if(!moveExists) {
+    }
+    std::cout<<"calculated board State" << std::endl;
+    if(isWhiteInCheck) {
+        if(moveExistsForWhite) {
+            isWhiteInCheckmate = false;
+        }
+        else {
+            isWhiteInCheckmate = true;
+        }
+    }
+    if(isBlackInCheck) {
+        if(moveExistsForBlack) {
+            isBlackInCheckmate = false;
+        }
+        else {
             isBlackInCheckmate = true;
         }
     }
-    else {
-        isBlackInCheckmate = false;
+
+    if(player == "white") {
+        if(!moveExistsForBlack) {
+            isStalemate = true;
+        }
+        else {
+            isStalemate = false;
+        }
     }
-
-    //TODO: implement checking if there is a stalemate
-
+    else {
+        if(!moveExistsForWhite) {
+            isStalemate = true;
+        }
+        else {
+            isStalemate = false;
+        }
+    }
 }
 
 // Getter for isWhiteInCheck
@@ -846,46 +868,6 @@ void Chessboard::validCapture(Piece* p, int x, int y) {
     }    
 }
 
-// Copies the chessboard to tempBoard
-void Chessboard::copyBoardToTemp() {
-    //deleteTempBoard();
-    std::string color;
-    std::string type;
-    for(int i = 0; i < 8; i++) {
-        for(int j = 0; j < 8; j++) {
-            if(board[i][j] == nullptr) {
-                tempBoard[i][j] == nullptr;
-            }
-            else {
-                color = board[i][j]->color;
-                type = board[i][j]->type;
-                Piece* p = new Piece(color, type, board[i][j]->validMoves);
-                tempBoard[i][j] = p;
-            }
-        }
-    }
-}
-
-// Replaces board with the tempBoard
-void Chessboard::replaceBoardWithTemp() {
-    //deleteBoard();
-    std::string color;
-    std::string type;
-    for(int i = 0; i < 8; i++) {
-        for(int j = 0; j < 8; j++) {
-            if(tempBoard[i][j] == nullptr) {
-                board[i][j] == nullptr;
-            }
-            else {
-                color = tempBoard[i][j]->color;
-                type = tempBoard[i][j]->type;
-                Piece* p = new Piece(color, type, tempBoard[i][j]->validMoves);
-                board[i][j] = p;
-            }
-        }
-    }
-}
-
 // Clears the board
 void Chessboard::deleteBoard() {
     for(int i = 0; i < 8; i++) {
@@ -898,17 +880,6 @@ void Chessboard::deleteBoard() {
     }
 }
 
-// Clears the tempBoard
-void Chessboard::deleteTempBoard() {
-    for(int i = 0; i < 8; i++) {
-        for(int j = 0; j < 8; j++) {
-            if(tempBoard[i][j] != nullptr) {
-                delete tempBoard[i][j];
-                tempBoard[i][j] = nullptr;
-            }
-        }
-    }
-}
 
 // Converts a letter between a and h to its corresponding index on the chessboard
 int Chessboard::convertToNumber(char c) {

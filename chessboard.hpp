@@ -32,7 +32,6 @@ struct Piece {
 class Chessboard {
 private:
     Piece* board[8][8];
-    Piece* tempBoard[8][8];
     /* whiteValidCaptures and blackValidCaptures store the spaces that the white pieces
      and black pieces can move to and capture pieces */
     std::map<std::pair <int,int>, int> whiteValidCaptures;
@@ -48,10 +47,7 @@ private:
     
     void addPiece(std::string color, std::string type, int xcord, int ycord);
     void validCapture(Piece* p, int x, int y);
-    void copyBoardToTemp();
-    void replaceBoardWithTemp();
     void deleteBoard();
-    void deleteTempBoard();
     int convertToNumber(char c);
 public:
     Chessboard();
@@ -61,9 +57,9 @@ public:
     void printBoard();
     bool validSpace(std::string space, int s);
     bool move(std::string player, std::string startSpace, std::string endSpace);
-    void calculateBoardState();
+    void calculateBoardState(std::string player);
     void calculateValidMoves();
-    void calculateKingStates();
+    void calculateKingStates(std::string player);
     bool getIsWhiteInCheck();
     bool getIsBlackInCheck();
     bool getIsWhiteInCheckmate();
