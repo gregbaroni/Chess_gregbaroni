@@ -385,7 +385,6 @@ bool Chessboard::move(std::string player, std::string startSpace, std::string en
 // and checks to see if there is a checkmate, stalemenate, etc.
 // Called after every move
 void Chessboard::calculateBoardState(std::string player) {
-    std::cout<<"calculate Board State" << std::endl;
     calculateValidMoves();
     calculateKingStates(player);
 }
@@ -655,7 +654,6 @@ void Chessboard::calculateValidMoves() {
 // Checks to see if the kings are in check, checkmate, or if there is a stalemate
 // Called after every move by calculateBoardState
 void Chessboard::calculateKingStates(std::string player) {
-    std::cout<<"calculate King States" << std::endl;
     if(whiteValidCaptures.find(blackKingPos) != whiteValidCaptures.end()) {
         isBlackInCheck = true;
     }
@@ -674,12 +672,8 @@ void Chessboard::calculateKingStates(std::string player) {
     bool moveExistsForBlack = false;
     Piece* p;
     Piece* temp;
-    Piece* tempBoard[8][8];
-    for(int i = 0; i < 8; i++) {
-        for(int j = 0; j < 8; j++) {
-            tempBoard[i][j] = nullptr;
-        }
-    }    
+    std::vector<Piece> oldBoard;
+    std::vector<std::pair<int,int>> coords;
     std::string color;
     std::string type;
     bool wasWhiteInCheck;
@@ -689,12 +683,10 @@ void Chessboard::calculateKingStates(std::string player) {
     std::map<std::pair <int,int>, int> moves;
     for(int i = 0; i < 8; i++) {
         for(int j = 0; j < 8; j++) {
-            if(board[i][j] != nullptr && ((!moveExistsForWhite && board[i][j]->color == "white") || (!moveExistsForBlack && board[i][j]->color == "black"))) {
-                std::cout << "piece at: " << i << " " << j << std::endl;                
+            if(board[i][j] != nullptr && ((!moveExistsForWhite && board[i][j]->color == "white") || (!moveExistsForBlack && board[i][j]->color == "black"))) {         
                 p = board[i][j];
                 moves = p->validMoves;
                 for(std::map<std::pair <int,int>, int>::iterator it = moves.begin(); it != moves.end(); it++) {
-                    std::cout << it->first.first << " " << it->first.second << std::endl;
                     temp = board[it->first.first][it->first.second];
                     wasWhiteInCheck = isWhiteInCheck;
                     wasBlackInCheck = isBlackInCheck;
@@ -703,21 +695,16 @@ void Chessboard::calculateKingStates(std::string player) {
 
                     for(int k = 0; k < 8; k++) {
                         for(int l = 0; l < 8; l++) {
-                            if(board[k][l] == nullptr) {
-                                tempBoard[k][l] == nullptr;
-                            }
-                            else {
+                            if(board[k][l] != nullptr) {
                                 color = board[k][l]->color;
                                 type = board[k][l]->type;
-                                /*
-                                std::cout << "ALLOCATING " << k << " " << l << " :" << type <<std::endl;
-                                std::cout << board[k][l]->validMoves.size() << std::endl;
-                                */
-                                Piece* p2 = new Piece(color, type, board[k][l]->validMoves);
-                                tempBoard[k][l] = p2;
+                                Piece p2(color, type, board[k][l]->validMoves);
+                                oldBoard.push_back(p2);
+                                coords.push_back(std::make_pair(k,l));
                             }
                         }
                     }
+
                     board[it->first.first][it->first.second] = board[i][j];
                     board[i][j] = nullptr;
                     if(p->type == "king") {
@@ -756,37 +743,15 @@ void Chessboard::calculateKingStates(std::string player) {
                     whiteValidCaptures = tempWhiteValidCaptures;
                     blackValidCaptures = tempBlackValidCaptures;
                     
-                    for(int k = 0; k < 8; k++) {
-                        for(int l = 0; l < 8; l++) {
-                            if(tempBoard[k][l] == nullptr) {
-                                if(board[k][l] != nullptr) {
-                                    delete board[k][l];
-                                }
-                                board[k][l] == nullptr;
-                            }
-                            else {
-                                color = tempBoard[k][l]->color;
-                                type = tempBoard[k][l]->type;
-                                /*
-                                std::cout << "ALLOCATING " << k << " " << l << " :" << type <<std::endl;
-                                std::cout << board[k][l]->validMoves.size() << std::endl;
-                                */
-                                Piece* p3 = new Piece(color, type, tempBoard[k][l]->validMoves);
-                                if(board[k][l] != nullptr) {
-                                    delete board[k][l];
-                                }
-                                board[k][l] = p3;
-                                delete tempBoard[k][l];
-                                tempBoard[k][l] = nullptr;
-                            }
-                        }
-                    }
-                                      
+                    for(int k = 0; k < oldBoard.size(); k++) {
+                        int x = coords[k].first;
+                        int y = coords[k].second;
+                        board[x][y]->validMoves = oldBoard[k].validMoves;
+                    }               
                 }
             }
         }
     }
-    std::cout<<"calculated board State" << std::endl;
     if(isWhiteInCheck) {
         if(moveExistsForWhite) {
             isWhiteInCheckmate = false;
