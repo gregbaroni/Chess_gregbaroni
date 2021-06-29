@@ -14,16 +14,20 @@ struct Piece {
     Piece(std::string c, std::string t) {
         color = c;
         type = t;
+        hasMoved = false;
         std::map<std::pair <int,int>, int> v;
         validMoves = v;
     }
     Piece(std::string c, std::string t, std::map<std::pair <int,int>, int> v) {
         color = c;
         type = t;
+        hasMoved = false;
         validMoves = v;
     }
     std::string color;
     std::string type;
+    // needed for castling
+    bool hasMoved;
     // validMoves stores the spaces that the piece can move to
     std::map<std::pair <int,int>, int> validMoves;
 };
@@ -60,11 +64,11 @@ public:
     void calculateBoardState(std::string player);
     void calculateValidMoves();
     void calculateKingStates(std::string player);
-    bool getIsWhiteInCheck();
-    bool getIsBlackInCheck();
-    bool getIsWhiteInCheckmate();
-    bool getIsBlackInCheckmate();
-    bool getIsStalemate();
+    const bool getIsWhiteInCheck();
+    const bool getIsBlackInCheck();
+    const bool getIsWhiteInCheckmate();
+    const bool getIsBlackInCheckmate();
+    const bool getIsStalemate();
 };
 
 #endif
