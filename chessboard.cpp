@@ -328,6 +328,41 @@ bool Chessboard::move(std::string player, std::string startSpace, std::string en
         }
     }
 
+    bool wasPromoted = false;
+    bool valid = false;
+    std::string promotion;
+    if(p->type == "pawn") {
+        if(p->color == "white") {
+            if(y_endSpace == 7) {
+                wasPromoted = true;
+            }
+        }
+        else {
+            if(y_endSpace == 0) {
+                wasPromoted = true;
+            }
+        }
+    }
+
+    if(wasPromoted) {
+        do {
+            std::cout << "Choose the pawn's promotion: ";
+            std::cin >> promotion;
+            for(int i = 0; i < promotion.length(); i++) {
+                promotion[i] = tolower(promotion[i]);
+            }
+            valid = validPromotion(promotion);
+            if(!valid) {
+                std::cin.clear();
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            }
+        }
+        while(!valid);
+
+        Piece* promotedPiece = new Piece(p->color, promotion);
+        board[x_endSpace][y_endSpace] = promotedPiece;
+    }
+
     calculateBoardState(player);
 
     if(player == "white") {
@@ -394,6 +429,9 @@ bool Chessboard::move(std::string player, std::string startSpace, std::string en
     delete temp;
 
     p->hasMoved = true;
+    if(wasPromoted) {
+        delete p;
+    }
 
     return true;
 }
@@ -678,7 +716,7 @@ void Chessboard::calculateValidMoves() {
 
             p2 = board[0][0];
             if(p2 != nullptr && p2->type == "rook" && p2->color == "white" && !(p2->hasMoved)) {
-                if(board[3][0] == nullptr && board[2][0] == nullptr) {
+                if(board[3][0] == nullptr && board[2][0] == nullptr && board[1][0] == nullptr) {
                     if(blackValidCaptures.find(std::make_pair(3,0)) == blackValidCaptures.end() && blackValidCaptures.find(std::make_pair(2,0)) == blackValidCaptures.end()) {
                         p->validMoves[std::make_pair(2,0)] = 1;
                     }
@@ -778,6 +816,19 @@ void Chessboard::calculateKingStates(std::string player) {
                     }
 
                     calculateValidMoves();
+
+                    if(whiteValidCaptures.find(blackKingPos) != whiteValidCaptures.end()) {
+                        isBlackInCheck = true;
+                    }
+                    else {
+                        isBlackInCheck = false;
+                    }
+                    if(blackValidCaptures.find(whiteKingPos) != blackValidCaptures.end()) {
+                        isWhiteInCheck = true;
+                    }
+                    else {
+                        isWhiteInCheck = false;
+                    }
 
                     if(p->color == "white") {
                         if(!isWhiteInCheck) {
@@ -892,6 +943,26 @@ void Chessboard::validCapture(Piece* p, int x, int y) {
             blackValidCaptures[std::make_pair(x,y)] = 1;
         }
     }    
+}
+
+// Checks to see if the user inputted promotion is valid
+bool Chessboard::validPromotion(std::string promotion) {
+    if(promotion == "rook") {
+        return true;
+    }
+    else if(promotion == "bishop") {
+        return true;
+    }
+    else if(promotion == "knight") {
+        return true;
+    }
+    else if(promotion == "queen") {
+        return true;
+    }
+    else {
+        std::cout << "Invalid promotion: that is not a valid promotion" << std::endl;
+        return false;
+    }
 }
 
 // Clears the board

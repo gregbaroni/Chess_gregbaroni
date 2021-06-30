@@ -19,14 +19,14 @@ int main() {
 
         turnCounter++;
         if(turnCounter % 2 == 1) {
-            cout << "White's turn:" << endl;
+            cout << "White's turn" << endl;
             player = "white";
             if(chessboard.getIsWhiteInCheck()) {
                 cout << "White is in Check" << endl;
             }
         }
         else {
-            cout << "Black's turn:" << endl;
+            cout << "Black's turn" << endl;
             player = "black";
             if(chessboard.getIsBlackInCheck()) {
                 cout << "Black is in Check" << endl;

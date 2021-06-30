@@ -7,6 +7,7 @@
 #include <map>
 #include <vector>
 #include <utility>
+#include <limits>
 
 
 // Struct to represent the pieces on the chessboard
@@ -51,6 +52,7 @@ private:
     
     void addPiece(std::string color, std::string type, int xcord, int ycord);
     void validCapture(Piece* p, int x, int y);
+    bool validPromotion(std::string promotion);
     void deleteBoard();
     int convertToNumber(char c);
 public:
