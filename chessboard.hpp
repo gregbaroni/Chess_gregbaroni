@@ -16,6 +16,7 @@ struct Piece {
         color = c;
         type = t;
         hasMoved = false;
+        justDoubleMoved = false;
         std::map<std::pair <int,int>, int> v;
         validMoves = v;
     }
@@ -23,12 +24,14 @@ struct Piece {
         color = c;
         type = t;
         hasMoved = false;
+        justDoubleMoved = false;
         validMoves = v;
     }
     std::string color;
     std::string type;
     // needed for castling
     bool hasMoved;
+    bool justDoubleMoved;
     // validMoves stores the spaces that the piece can move to
     std::map<std::pair <int,int>, int> validMoves;
 };

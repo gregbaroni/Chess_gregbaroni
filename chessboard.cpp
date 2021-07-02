@@ -290,14 +290,32 @@ bool Chessboard::move(std::string player, std::string startSpace, std::string en
                 color = board[i][j]->color;
                 type = board[i][j]->type;
                 Piece p2(color, type, board[i][j]->validMoves);
+                p2.hasMoved = board[i][j]->hasMoved;
+                p2.justDoubleMoved = board[i][j]->justDoubleMoved;
                 oldBoard.push_back(p2);
                 coords.push_back(std::make_pair(i,j));
             }
         }
     }
 
-    board[x_endSpace][y_endSpace] = board[x_startSpace][y_startSpace];
-    board[x_startSpace][y_startSpace] = nullptr;
+    bool enPassant = false;
+    if(p->type == "pawn" && temp == nullptr && x_startSpace != x_endSpace) {
+        board[x_endSpace][y_endSpace] = board[x_startSpace][y_startSpace];
+        board[x_startSpace][y_startSpace] = nullptr;
+        if(p->color == "white") {
+            temp = board[x_endSpace][y_endSpace-1];
+            board[x_endSpace][y_endSpace-1] = nullptr;
+        }   
+        else {
+            temp = board[x_endSpace][y_endSpace+1];
+            board[x_endSpace][y_endSpace+1] = nullptr;
+        }     
+        enPassant = true;
+    }
+    else {
+        board[x_endSpace][y_endSpace] = board[x_startSpace][y_startSpace];
+        board[x_startSpace][y_startSpace] = nullptr;
+    }
 
     if(p->type == "king") {
         if(player == "white") {
@@ -328,6 +346,7 @@ bool Chessboard::move(std::string player, std::string startSpace, std::string en
         }
     }
 
+    bool doubleMove = false;
     bool wasPromoted = false;
     bool valid = false;
     std::string promotion;
@@ -336,13 +355,37 @@ bool Chessboard::move(std::string player, std::string startSpace, std::string en
             if(y_endSpace == 7) {
                 wasPromoted = true;
             }
+            if(y_startSpace == 1 && y_endSpace == 3) {
+                p->justDoubleMoved = true;
+                doubleMove = true;
+            }
         }
         else {
             if(y_endSpace == 0) {
                 wasPromoted = true;
             }
+            if(y_startSpace == 6 && y_endSpace == 4) {
+                p->justDoubleMoved = true;
+                doubleMove = true;
+            }
         }
     }
+
+    for(int i = 0; i < 8; i++) {
+        for(int j = 0; j < 8; j++) {
+            if(board[i][j] !=nullptr) {
+                if(i != x_endSpace && j != y_endSpace) {
+                    board[i][j]->justDoubleMoved = false;
+                }
+                else {
+                    if(!doubleMove) {
+                        board[i][j]->justDoubleMoved = false;
+                    }
+                }
+            }
+        }
+    }
+
 
     if(wasPromoted) {
         do {
@@ -374,8 +417,15 @@ bool Chessboard::move(std::string player, std::string startSpace, std::string en
                 std::cout << "Illegal move: that move puts your king in Check" << std::endl;
             }
 
-            board[x_endSpace][y_endSpace] = temp;
-            board[x_startSpace][y_startSpace] = p;
+            if(enPassant) {
+                board[x_startSpace][y_startSpace] = p;   
+                board[x_endSpace][y_endSpace] = nullptr;
+                board[x_endSpace][y_endSpace-1] = temp;       
+            }
+            else {
+                board[x_endSpace][y_endSpace] = temp;
+                board[x_startSpace][y_startSpace] = p;
+            }
             if(p->type == "king") {
                 whiteKingPos = std::make_pair(x_startSpace, y_startSpace);
             }
@@ -390,6 +440,8 @@ bool Chessboard::move(std::string player, std::string startSpace, std::string en
                 int x = coords[i].first;
                 int y = coords[i].second;
                 board[x][y]->validMoves = oldBoard[i].validMoves;
+                board[x][y]->hasMoved = oldBoard[i].hasMoved;
+                board[x][y]->justDoubleMoved = oldBoard[i].justDoubleMoved;
             }
 
             return false;
@@ -403,9 +455,16 @@ bool Chessboard::move(std::string player, std::string startSpace, std::string en
             else {
                 std::cout << "Illegal move: that move puts your king in Check" << std::endl;
             }
+            if(enPassant) {
+                board[x_startSpace][y_startSpace] = p;   
+                board[x_endSpace][y_endSpace] = nullptr;
+                board[x_endSpace][y_endSpace+1] = temp;       
+            }
+            else {
+                board[x_endSpace][y_endSpace] = temp;
+                board[x_startSpace][y_startSpace] = p;
+            }
 
-            board[x_endSpace][y_endSpace] = temp;
-            board[x_startSpace][y_startSpace] = p;
             if(p->type == "king") {
                 blackKingPos = std::make_pair(x_startSpace, y_startSpace);
             }
@@ -420,6 +479,8 @@ bool Chessboard::move(std::string player, std::string startSpace, std::string en
                 int x = coords[i].first;
                 int y = coords[i].second;
                 board[x][y]->validMoves = oldBoard[i].validMoves;
+                board[x][y]->hasMoved = oldBoard[i].hasMoved;
+                board[x][y]->justDoubleMoved = oldBoard[i].justDoubleMoved;
             }
 
             return false;
@@ -429,6 +490,7 @@ bool Chessboard::move(std::string player, std::string startSpace, std::string en
     delete temp;
 
     p->hasMoved = true;
+
     if(wasPromoted) {
         delete p;
     }
@@ -471,6 +533,19 @@ void Chessboard::calculateValidMoves() {
                             p->validMoves[std::make_pair(i-1,j+1)] = 1;
                             whiteValidCaptures[std::make_pair(i-1,j+1)] = 1;                                
                         }
+                        // En Passant
+                        if(j == 4 && i+1 < 8 && board[i+1][j] != nullptr && board[i+1][j]->type == "pawn" && board[i+1][j]->color == "black") {
+                            if(board[i+1][j]->justDoubleMoved) {
+                                p->validMoves[std::make_pair(i+1,j+1)] = 1;
+                                whiteValidCaptures[std::make_pair(i+1,j+1)] = 1;  
+                            }
+                        }
+                        if(j == 4 && i-1 >= 0 && board[i-1][j] != nullptr && board[i-1][j]->type == "pawn" && board[i-1][j]->color == "black") {
+                            if(board[i-1][j]->justDoubleMoved) {
+                                p->validMoves[std::make_pair(i-1,j+1)] = 1;
+                                whiteValidCaptures[std::make_pair(i-1,j+1)] = 1;  
+                            }
+                        }
                     }
                     else {
                         if(j-1 >= 0 && board[i][j-1] == nullptr) {
@@ -487,9 +562,20 @@ void Chessboard::calculateValidMoves() {
                             p->validMoves[std::make_pair(i-1,j-1)] = 1;
                             blackValidCaptures[std::make_pair(i-1,j-1)] = 1;                                
                         }
+                        // En Passant
+                        if(j == 3 && i+1 < 8 && board[i+1][j] != nullptr && board[i+1][j]->type == "pawn" && board[i+1][j]->color == "white") {
+                            if(board[i+1][j]->justDoubleMoved) {
+                                p->validMoves[std::make_pair(i+1,j-1)] = 1;
+                                blackValidCaptures[std::make_pair(i+1,j-1)] = 1;  
+                            }
+                        }
+                        if(j == 3 && i-1 >= 0 && board[i-1][j] != nullptr && board[i-1][j]->type == "pawn" && board[i-1][j]->color == "white") {
+                            if(board[i-1][j]->justDoubleMoved) {
+                                p->validMoves[std::make_pair(i-1,j-1)] = 1;
+                                blackValidCaptures[std::make_pair(i-1,j-1)] = 1;  
+                            }
+                        }
                     }
-                    // TODO: Implement en passant
-                    // TODO: Implement pawn reaching end of the board
                 }
                 else if(p->type == "rook") {
                     // Vertical movement
