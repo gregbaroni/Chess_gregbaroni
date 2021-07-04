@@ -17,23 +17,13 @@ struct Piece {
         type = t;
         hasMoved = false;
         justDoubleMoved = false;
-        std::map<std::pair <int,int>, int> v;
-        validMoves = v;
-    }
-    Piece(std::string c, std::string t, std::map<std::pair <int,int>, int> v) {
-        color = c;
-        type = t;
-        hasMoved = false;
-        justDoubleMoved = false;
-        validMoves = v;
+
     }
     std::string color;
     std::string type;
     // needed for castling
     bool hasMoved;
     bool justDoubleMoved;
-    // validMoves stores the spaces that the piece can move to
-    std::map<std::pair <int,int>, int> validMoves;
 };
 
 // Class to represent the chessboard
@@ -42,8 +32,10 @@ private:
     Piece* board[8][8];
     /* whiteValidCaptures and blackValidCaptures store the spaces that the white pieces
      and black pieces can move to and capture pieces */
-    std::map<std::pair <int,int>, int> whiteValidCaptures;
-    std::map<std::pair <int,int>, int> blackValidCaptures;
+    std::map<std::pair<std::pair<int,int>, std::pair <int,int>>, int> whitePossibleMoves;
+    std::map<std::pair<std::pair<int,int>, std::pair <int,int>>, int> blackPossibleMoves;
+    std::map<std::pair<std::pair<int,int>, std::pair <int,int>>, int> whiteValidMoves;
+    std::map<std::pair<std::pair<int,int>, std::pair <int,int>>, int> blackValidMoves;
     // whiteKingPos and blackKingPos store the positions of the kings
     std::pair<int,int> whiteKingPos;
     std::pair<int,int> blackKingPos;
@@ -54,7 +46,9 @@ private:
     bool isStalemate;
     
     void addPiece(std::string color, std::string type, int xcord, int ycord);
-    void validCapture(Piece* p, int x, int y);
+    void possibleMove(Piece* p, std::pair<int,int> startCoords, int x, int y);
+    bool canBlackCapture(std::pair<int,int> endCoords);
+    bool canWhiteCapture(std::pair<int,int> endCoords);
     bool validPromotion(std::string promotion);
     void deleteBoard();
     int convertToNumber(char c);
@@ -67,7 +61,7 @@ public:
     bool validSpace(std::string space, int s);
     bool move(std::string player, std::string startSpace, std::string endSpace);
     void calculateBoardState(std::string player);
-    void calculateValidMoves();
+    void calculatePossibleMoves();
     void calculateKingStates(std::string player);
     const bool getIsWhiteInCheck();
     const bool getIsBlackInCheck();
