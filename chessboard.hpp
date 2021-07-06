@@ -21,8 +21,9 @@ struct Piece {
     }
     std::string color;
     std::string type;
-    // needed for castling
+    // Needed for castling
     bool hasMoved;
+    // Needed for en passant
     bool justDoubleMoved;
 };
 
@@ -30,8 +31,10 @@ struct Piece {
 class Chessboard {
 private:
     Piece* board[8][8];
-    /* whiteValidCaptures and blackValidCaptures store the spaces that the white pieces
-     and black pieces can move to and capture pieces */
+    /* whitePossibleMoves and blackPossiblemoves store the spaces that the white pieces
+     and black pieces can move to */
+    /* whiteValidMoves and blackValidMoves store the possible moves which do not put the
+     player's king in check */
     std::map<std::pair<std::pair<int,int>, std::pair <int,int>>, int> whitePossibleMoves;
     std::map<std::pair<std::pair<int,int>, std::pair <int,int>>, int> blackPossibleMoves;
     std::map<std::pair<std::pair<int,int>, std::pair <int,int>>, int> whiteValidMoves;

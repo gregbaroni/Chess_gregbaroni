@@ -130,6 +130,7 @@ Chessboard& Chessboard::operator=(const Chessboard& source) {
 
 
 // Prints the current state of the board
+// Uppercase letters for black, lowercase letters for white
 void Chessboard::printBoard() {
     for(int j = 7; j >= 0; j--) {
         std::cout << " " << j + 1 << " |";
@@ -238,7 +239,10 @@ bool Chessboard::validSpace(std::string space, int s) {
 
 
 // Function for carrying out a player's move
+// Input is the color of the piece that is moving, and the start space and endspace
+// Start space and end space are strings of the form "e3" or "a6"
 bool Chessboard::move(std::string player, std::string startSpace, std::string endSpace) {
+    // convert start space and end space to numbers
     int x_startSpace, y_startSpace;
     int x_endSpace, y_endSpace;
     y_startSpace = startSpace[1] - '1';
@@ -251,6 +255,7 @@ bool Chessboard::move(std::string player, std::string startSpace, std::string en
     std::pair<int,int> endCoords = std::make_pair(x_endSpace, y_endSpace);
     std::pair<std::pair<int,int>, std::pair <int,int>> move = std::make_pair(startCoords, endCoords);
 
+    // Check to see if move is valid
     if(p == nullptr) {
         std::cout << "Illegal move: there is no piece on that square" << std::endl;
         return false;
@@ -261,6 +266,7 @@ bool Chessboard::move(std::string player, std::string startSpace, std::string en
     }
     if(player == "white") {
         if(whitePossibleMoves.find(move) == whitePossibleMoves.end()) {
+            // Check if the player is attempting to castle
             if(p->type == "king") {
                 if(x_startSpace == 4 && y_startSpace == 0) {
                     if((x_endSpace == 6 && y_endSpace == 0) ||(x_endSpace == 2 && y_endSpace == 0)) {
@@ -272,6 +278,7 @@ bool Chessboard::move(std::string player, std::string startSpace, std::string en
             std::cout << "Illegal move: that piece is unable to move to that space" << std::endl;
             return false;
         }
+        // Move is possible but not legal
         if(whiteValidMoves.find(move) == whiteValidMoves.end()) {
             if(isWhiteInCheck) {
                 std::cout << "Illegal move: your king is in Check" << std::endl;
@@ -285,6 +292,7 @@ bool Chessboard::move(std::string player, std::string startSpace, std::string en
     }
     else {
         if(blackPossibleMoves.find(move) == blackPossibleMoves.end()) {
+            // Check if the player is attempting to castle
             if(p->type == "king") {
                 if(x_startSpace == 4 && y_startSpace == 7) {
                     if((x_endSpace == 6 && y_endSpace == 7) ||(x_endSpace == 2 && y_endSpace == 7)) {
@@ -296,6 +304,7 @@ bool Chessboard::move(std::string player, std::string startSpace, std::string en
             std::cout << "Illegal move: that piece is unable to move to that space" << std::endl;
             return false;
         }
+        // Move is possible but not legal
         if(blackValidMoves.find(move) == blackValidMoves.end()) {
             if(isBlackInCheck) {
                 std::cout << "Illegal move: your king is in Check" << std::endl;
@@ -312,6 +321,7 @@ bool Chessboard::move(std::string player, std::string startSpace, std::string en
     Piece* temp = board[x_endSpace][y_endSpace];
 
     bool enPassant = false;
+    // Check if en passant
     if(p->type == "pawn" && temp == nullptr && x_startSpace != x_endSpace) {
         // En passant is when a pawn takes another pawn that just double moved by moving to the space it skipped
         // Only capture where the space the attacking piece ends on is not where the captured piece is
@@ -370,6 +380,7 @@ bool Chessboard::move(std::string player, std::string startSpace, std::string en
     bool wasPromoted = false;
     bool valid = false;
     std::string promotion;
+    // Check to see if pawn has reached the last row
     if(p->type == "pawn") {
         if(p->color == "white") {
             if(y_endSpace == 7) {
@@ -391,7 +402,8 @@ bool Chessboard::move(std::string player, std::string startSpace, std::string en
         }
     }
 
-
+    // Update the justDoubleMoved value for each piece
+    // This is needed for determining if an en passant is legal
     for(int i = 0; i < 8; i++) {
         for(int j = 0; j < 8; j++) {
             if(board[i][j] !=nullptr) {
@@ -407,7 +419,7 @@ bool Chessboard::move(std::string player, std::string startSpace, std::string en
         }
     }
 
-
+    // Pawn promotion
     if(wasPromoted) {
         do {
             std::cout << "Choose the pawn's promotion: ";
@@ -427,7 +439,7 @@ bool Chessboard::move(std::string player, std::string startSpace, std::string en
         board[x_endSpace][y_endSpace] = promotedPiece;
     }
 
-
+    // Update board and valid moves
     calculateBoardState(player);
 
     p->hasMoved = true;
@@ -442,6 +454,7 @@ bool Chessboard::move(std::string player, std::string startSpace, std::string en
 // Function that recalculates the valid moves for each piece
 // and checks to see if there is a checkmate, stalemenate, etc.
 // Called after every move
+// Player is the color of the piece that just moved, needed for determining if there is a stalemate
 void Chessboard::calculateBoardState(std::string player) {
     whiteValidMoves.clear();
     blackValidMoves.clear();
@@ -449,8 +462,8 @@ void Chessboard::calculateBoardState(std::string player) {
     calculateKingStates(player);
 }
 
-// Function that recalculates the valid moves
-// Called at the start of the match and when checking for a checkmate, stalemate, etc.
+// Function that calculates the possible moves for each piece
+// Called at the start of the match and after each move by calculateBoardState
 void Chessboard::calculatePossibleMoves() {
     whitePossibleMoves.clear();
     blackPossibleMoves.clear();
@@ -781,7 +794,7 @@ void Chessboard::calculatePossibleMoves() {
 }
 
 // Checks to see if the kings are in check, checkmate, or if there is a stalemate
-// Called after every move by calculateBoardState
+// Also checks each possible move to see if the move is valid, meaning it does not put the player's king in check
 void Chessboard::calculateKingStates(std::string player) {
     if(canWhiteCapture(blackKingPos)) {
         isBlackInCheck = true;
@@ -803,6 +816,7 @@ void Chessboard::calculateKingStates(std::string player) {
     std::map<std::pair<std::pair<int,int>, std::pair <int,int>>, int> tempWhitePossibleMoves = whitePossibleMoves;
     std::map<std::pair<std::pair<int,int>, std::pair <int,int>>, int> tempBlackPossibleMoves = blackPossibleMoves;
 
+    // Check possible moves for white
     for(std::map<std::pair<std::pair<int,int>, std::pair <int,int>>, int>::iterator it = tempWhitePossibleMoves.begin(); it != tempWhitePossibleMoves.end(); it++) {
         x_startSpace = it->first.first.first;
         y_startSpace = it->first.first.second;
@@ -831,6 +845,7 @@ void Chessboard::calculateKingStates(std::string player) {
         }
     }
 
+    // Check possible moves for white
     for(std::map<std::pair<std::pair<int,int>, std::pair <int,int>>, int>::iterator it = tempBlackPossibleMoves.begin(); it != tempBlackPossibleMoves.end(); it++) {
         x_startSpace = it->first.first.first;
         y_startSpace = it->first.first.second;
@@ -863,6 +878,7 @@ void Chessboard::calculateKingStates(std::string player) {
     whitePossibleMoves = tempWhitePossibleMoves;
     blackPossibleMoves = tempBlackPossibleMoves;
 
+    // Check for checkmates and stalemate
     if(isWhiteInCheck) {
         if(whiteValidMoves.size() > 0) {
             isWhiteInCheckmate = false;
@@ -931,7 +947,7 @@ void Chessboard::addPiece(std::string color, std::string type, int xcord, int yc
     board[xcord][ycord] = p;
 }
 
-// Sees if a move is valid and, if so, adds it to the possibleMoves map
+// Sees if a move is possible and, if so, adds it to the possibleMoves map
 void Chessboard::possibleMove(Piece* p, std::pair<int,int> startCoords, int x, int y) {
     std::pair<int,int> endCoords = std::make_pair(x,y);
     if(board[x][y] == nullptr || board[x][y]->color != p->color) {
@@ -944,7 +960,7 @@ void Chessboard::possibleMove(Piece* p, std::pair<int,int> startCoords, int x, i
     }
 }
 
-// Checks to see if black can attack the space x, y
+// Checks to see if black can attack the space x, y with some piece
 bool Chessboard::canBlackCapture(std::pair<int,int> endCoords) {
     std::pair<int,int> startCoords;
     std::pair<std::pair<int,int>, std::pair <int,int>> move;
@@ -962,7 +978,7 @@ bool Chessboard::canBlackCapture(std::pair<int,int> endCoords) {
     return false;
 }
 
-// Checks to see if white can attack the space x, y
+// Checks to see if white can attack the space x, y with some piece
 bool Chessboard::canWhiteCapture(std::pair<int,int> endCoords) {
     std::pair<int,int> startCoords;
     std::pair<std::pair<int,int>, std::pair <int,int>> move;
