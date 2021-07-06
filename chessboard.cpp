@@ -939,6 +939,16 @@ const bool Chessboard::getIsStalemate() {
     return isStalemate;
 }
 
+// Getter for whiteValidMoves
+const std::map<std::pair<std::pair<int,int>, std::pair <int,int>>, int> Chessboard::getWhiteValidMoves() {
+    return whiteValidMoves;
+}
+
+// Getter for blackValidMoves
+const std::map<std::pair<std::pair<int,int>, std::pair <int,int>>, int> Chessboard::getBlackValidMoves() {
+    return blackValidMoves;
+}
+
 // Adds a piece to the board at the specified xcord and ycord
 // Type specifies which type of piece to add
 // Color specifies the color of the piece being added

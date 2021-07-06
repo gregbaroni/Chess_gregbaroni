@@ -1,10 +1,13 @@
 #include "chessboard.hpp"
+#include "chessAI.hpp"
 #include <iostream>
 #include <string>
 #include <limits>
+#include <utility>
 
 using namespace std;
 
+// Checks to see if the user inputted either "2p" or "ai"
 bool validResponse(string answer) {
     for(int i = 0; i < answer.length(); i++) {
         if(isalpha(answer[i]))
@@ -125,12 +128,16 @@ int main() {
 
         player = answer;
         string aiColor;
+        bool aiTurn;
+        std::string move;
         if(player == "white") {
             aiColor = "black";
         }
         else {
             aiColor = "white";
         }
+
+        ChessAI AI(aiColor);
 
         while(!chessboard.getIsWhiteInCheckmate() && !chessboard.getIsBlackInCheckmate() && !chessboard.getIsStalemate()) {
             chessboard.printBoard();
@@ -139,44 +146,69 @@ int main() {
             turnCounter++;
             if(turnCounter % 2 == 1) {
                 cout << "White's turn" << endl;
-                player = "white";
+                if(player == "white") {
+                    aiTurn = false;
+                }
+                else {
+                    aiTurn = true;
+                }
                 if(chessboard.getIsWhiteInCheck()) {
                     cout << "White is in Check" << endl;
                 }
             }
             else {
                 cout << "Black's turn" << endl;
-                player = "black";
+                if(player == "black") {
+                    aiTurn = false;
+                }
+                else {
+                    aiTurn = true;
+                }
                 if(chessboard.getIsBlackInCheck()) {
                     cout << "Black is in Check" << endl;
                 }
             }
-            do {
+
+            std::string m;
+            // Player's turn
+            if(!aiTurn) {
                 do {
-                    cout << "Enter move: ";
-                    cin >> startSpace;
-                    valid = chessboard.validSpace(startSpace, 0);
-                    if(!valid) {
-                        cin.clear();
-                        cin.ignore(numeric_limits<std::streamsize>::max(), '\n');
+                    do {
+                        cout << "Enter move: ";
+                        cin >> startSpace;
+                        valid = chessboard.validSpace(startSpace, 0);
+                        if(!valid) {
+                            cin.clear();
+                            cin.ignore(numeric_limits<std::streamsize>::max(), '\n');
+                        }
                     }
+                    while(!valid);
+                    do {
+                        cin >> endSpace;
+                        valid = chessboard.validSpace(endSpace, 1);
+                        if(!valid) {
+                            cin.clear();
+                            cin.ignore(numeric_limits<std::streamsize>::max(), '\n');
+                        }
+                    }
+                    while(!valid);
+                    valid = chessboard.move(player, startSpace, endSpace);
+                    cin.clear();
+                    cin.ignore(numeric_limits<std::streamsize>::max(), '\n');
                 }
                 while(!valid);
-                do {
-                    cin >> endSpace;
-                    valid = chessboard.validSpace(endSpace, 1);
-                    if(!valid) {
-                        cin.clear();
-                        cin.ignore(numeric_limits<std::streamsize>::max(), '\n');
-                    }
-                }
-                while(!valid);
-                valid = chessboard.move(player, startSpace, endSpace);
-                cin.clear();
-                cin.ignore(numeric_limits<std::streamsize>::max(), '\n');
+                cout<<endl;
             }
-            while(!valid);
-            cout<<endl;
+
+            // AI's turn
+            else if(aiTurn) {
+                move = AI.getNextMove(chessboard);
+                startSpace = move.substr(0,2);
+                endSpace = move.substr(3,2);
+                cout << "The AI's move is: " << startSpace << " " << endSpace << endl;
+                chessboard.move(aiColor, startSpace, endSpace);
+                cout<<endl;
+            }
         }
         chessboard.printBoard();
         cout << endl;

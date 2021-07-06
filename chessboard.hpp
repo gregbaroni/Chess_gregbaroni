@@ -71,6 +71,8 @@ public:
     const bool getIsWhiteInCheckmate();
     const bool getIsBlackInCheckmate();
     const bool getIsStalemate();
+    const std::map<std::pair<std::pair<int,int>, std::pair <int,int>>, int> getWhiteValidMoves();
+    const std::map<std::pair<std::pair<int,int>, std::pair <int,int>>, int> getBlackValidMoves();
 };
 
 #endif
