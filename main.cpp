@@ -20,6 +20,7 @@ bool validResponse(string answer) {
     return true;
 }
 
+
 int main() {
     Chessboard chessboard;
     int turnCounter = 0;

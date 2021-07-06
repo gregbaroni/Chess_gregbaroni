@@ -1,5 +1,6 @@
 #include "chessboard.hpp"
 
+
 // Default constructor initializes the chessboard
 Chessboard::Chessboard() {
     isWhiteInCheck = false;
@@ -17,7 +18,7 @@ Chessboard::Chessboard() {
     blackValidMoves = v4;
 
     for(int i = 0; i < 8; i++) {
-        for(int j = 0; j<8; j++) {
+        for(int j = 0; j < 8; j++) {
             board[i][j] = nullptr;
         }
     }
@@ -76,18 +77,20 @@ Chessboard::Chessboard(const Chessboard& source) {
     whiteValidMoves = source.whiteValidMoves;
     blackValidMoves = source.blackValidMoves;
 
+    for(int i = 0; i < 8; i++) {
+        for(int j = 0; j < 8; j++) {
+            board[i][j] = nullptr;
+        }
+    }
+
     std::string color;
     std::string type;
     for(int i = 0; i < 8; i++) {
         for(int j = 0; j < 8; j++) {
-            if(source.board[i][j] == nullptr) {
-                board[i][j] == nullptr;
-            }
-            else {
+            if(source.board[i][j] != nullptr) {
                 color = source.board[i][j]->color;
                 type = source.board[i][j]->type;
-                Piece* p = new Piece(color, type);
-                board[i][j] = p;
+                addPiece(color, type, i, j);
             }
         }
     }
@@ -110,21 +113,24 @@ Chessboard& Chessboard::operator=(const Chessboard& source) {
     whiteValidMoves = source.whiteValidMoves;
     blackValidMoves = source.blackValidMoves;
 
+    for(int i = 0; i < 8; i++) {
+        for(int j = 0; j < 8; j++) {
+            board[i][j] = nullptr;
+        }
+    }
+
     std::string color;
     std::string type;
     for(int i = 0; i < 8; i++) {
         for(int j = 0; j < 8; j++) {
-            if(source.board[i][j] == nullptr) {
-                board[i][j] == nullptr;
-            }
-            else {
+            if(source.board[i][j] != nullptr) {
                 color = source.board[i][j]->color;
                 type = source.board[i][j]->type;
-                Piece* p = new Piece(color, type);
-                board[i][j] = p;
+                addPiece(color, type, i, j);
             }
         }
     }
+    
     return *this;
 }
 
@@ -1031,8 +1037,19 @@ void Chessboard::deleteBoard() {
     for(int i = 0; i < 8; i++) {
         for(int j = 0; j < 8; j++) {
             if(board[i][j] != nullptr) {
-                delete board[i][j];
+                std::cout << board[i][j]->type << " at " << i << " " << j << std::endl;
+            }
+        }
+    }
+    Piece *temp;
+    for(int i = 0; i < 8; i++) {
+        for(int j = 0; j < 8; j++) {
+            if(board[i][j] != nullptr) {
+                std::cout<< "deleting " << i << " " << j << std::endl; 
+                temp = board[i][j];
+                //delete board[i][j];
                 board[i][j] = nullptr;
+                delete temp;
             }
         }
     }
