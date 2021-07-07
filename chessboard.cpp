@@ -247,14 +247,14 @@ bool Chessboard::validSpace(std::string space, int s) {
 // Function for carrying out a player's move
 // Input is the color of the piece that is moving, and the start space and endspace
 // Start space and end space are strings of the form "e3" or "a6"
-bool Chessboard::move(std::string player, std::string startSpace, std::string endSpace) {
+bool Chessboard::move(std::string player, std::pair<int,int> startSpace, std::pair<int,int> endSpace) {
     // convert start space and end space to numbers
     int x_startSpace, y_startSpace;
     int x_endSpace, y_endSpace;
-    y_startSpace = startSpace[1] - '1';
-    y_endSpace = endSpace[1] - '1';
-    x_startSpace = convertToNumber(startSpace[0]);
-    x_endSpace = convertToNumber(endSpace[0]);
+    x_startSpace = startSpace.first;
+    y_startSpace = startSpace.second;
+    x_endSpace = endSpace.first;
+    y_endSpace = endSpace.second;
 
     Piece* p = board[x_startSpace][y_startSpace];
     std::pair<int,int> startCoords = std::make_pair(x_startSpace, y_startSpace);
@@ -386,7 +386,7 @@ bool Chessboard::move(std::string player, std::string startSpace, std::string en
     bool wasPromoted = false;
     bool valid = false;
     std::string promotion;
-    // Check to see if pawn has reached the last row
+    // Check to see if pawn has reached the last row or just double moved
     if(p->type == "pawn") {
         if(p->color == "white") {
             if(y_endSpace == 7) {
@@ -747,6 +747,7 @@ void Chessboard::calculatePossibleMoves() {
     }
     // Check to see if kings can castle
     Piece* p2;
+    startCoords = std::make_pair(4,0);
     if(board[4][0] != nullptr) {
         p = board[4][0];
         if(p->type == "king" && p->color == "white" && !(p->hasMoved) && !isWhiteInCheck) {
@@ -771,6 +772,7 @@ void Chessboard::calculatePossibleMoves() {
             }
         }
     }
+    startCoords = std::make_pair(4,7);
     if(board[4][7] != nullptr) {
         p = board[4][7];
         if(p->type == "king" && p->color == "black" && !(p->hasMoved) && !isBlackInCheck) {
@@ -920,6 +922,11 @@ void Chessboard::calculateKingStates(std::string player) {
     }
 }
 
+// Returns the piece at coordinates x and y
+Piece* Chessboard::getPieceAt(int x, int y) {
+    return board[x][y];
+}
+
 // Getter for isWhiteInCheck
 const bool Chessboard::getIsWhiteInCheck() {
     return isWhiteInCheck;
@@ -1053,39 +1060,4 @@ void Chessboard::deleteBoard() {
             }
         }
     }
-}
-
-
-// Converts a letter between a and h to its corresponding index on the chessboard
-int Chessboard::convertToNumber(char c) {
-    switch(c) {
-        case 'a':
-            return 0;
-            break;
-        case 'b':
-            return 1;
-            break;
-        case 'c':
-            return 2;
-            break;
-        case 'd':
-            return 3;
-            break;
-        case 'e':
-            return 4;
-            break;
-        case 'f':
-            return 5;
-            break;
-        case 'g':
-            return 6;
-            break;
-        case 'h':
-            return 7;
-            break;
-        default:
-            std::cout << "Unexpected letter, exiting program" << std::endl;
-            exit(1);
-    }
-    return -99;
 }

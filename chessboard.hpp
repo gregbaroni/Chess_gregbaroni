@@ -54,7 +54,6 @@ private:
     bool canWhiteCapture(std::pair<int,int> endCoords);
     bool validPromotion(std::string promotion);
     void deleteBoard();
-    int convertToNumber(char c);
 public:
     Chessboard();
     ~Chessboard();
@@ -62,10 +61,11 @@ public:
     Chessboard& operator=(const Chessboard& source);
     void printBoard();
     bool validSpace(std::string space, int s);
-    bool move(std::string player, std::string startSpace, std::string endSpace);
+    bool move(std::string player, std::pair<int,int> startSpace, std::pair<int,int> endSpace);
     void calculateBoardState(std::string player);
     void calculatePossibleMoves();
     void calculateKingStates(std::string player);
+    Piece* getPieceAt(int x, int y);
     const bool getIsWhiteInCheck();
     const bool getIsBlackInCheck();
     const bool getIsWhiteInCheckmate();

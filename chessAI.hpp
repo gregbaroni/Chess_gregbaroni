@@ -6,17 +6,16 @@
 #include <string>
 #include <map>
 #include <utility>
-#include <random>
+#include <ctime>
 
 class ChessAI {
 private:
     std::string color;
     
-    std::string convertMove(std::pair<std::pair<int,int>, std::pair<int,int>> move);
-    std::string convertToLetter(int n);
+    int getValueOfPiece(Piece* piece);
 public:
     ChessAI(std::string c) : color(c) {}
-    std::string getNextMove(Chessboard& board);
+    std::pair<std::pair<int,int>, std::pair <int,int>> getNextMove(Chessboard& board);
 };
 
 
