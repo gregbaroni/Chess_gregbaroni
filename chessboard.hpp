@@ -65,14 +65,14 @@ public:
     void calculateBoardState(std::string player);
     void calculatePossibleMoves();
     void calculateKingStates(std::string player);
-    Piece* getPieceAt(int x, int y);
-    const bool getIsWhiteInCheck();
-    const bool getIsBlackInCheck();
-    const bool getIsWhiteInCheckmate();
-    const bool getIsBlackInCheckmate();
-    const bool getIsStalemate();
-    const std::map<std::pair<std::pair<int,int>, std::pair <int,int>>, int> getWhiteValidMoves();
-    const std::map<std::pair<std::pair<int,int>, std::pair <int,int>>, int> getBlackValidMoves();
+    Piece* const getPieceAt(int x, int y);
+    bool const getIsWhiteInCheck();
+    bool const getIsBlackInCheck();
+    bool const getIsWhiteInCheckmate();
+    bool const getIsBlackInCheckmate();
+    bool const getIsStalemate();
+    std::map<std::pair<std::pair<int,int>, std::pair <int,int>>, int> const getWhiteValidMoves();
+    std::map<std::pair<std::pair<int,int>, std::pair <int,int>>, int> const getBlackValidMoves();
 };
 
 #endif

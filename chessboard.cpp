@@ -853,7 +853,7 @@ void Chessboard::calculateKingStates(std::string player) {
         }
     }
 
-    // Check possible moves for white
+    // Check possible moves for black
     for(std::map<std::pair<std::pair<int,int>, std::pair <int,int>>, int>::iterator it = tempBlackPossibleMoves.begin(); it != tempBlackPossibleMoves.end(); it++) {
         x_startSpace = it->first.first.first;
         y_startSpace = it->first.first.second;
@@ -923,42 +923,42 @@ void Chessboard::calculateKingStates(std::string player) {
 }
 
 // Returns the piece at coordinates x and y
-Piece* Chessboard::getPieceAt(int x, int y) {
+Piece* const Chessboard::getPieceAt(int x, int y) {
     return board[x][y];
 }
 
 // Getter for isWhiteInCheck
-const bool Chessboard::getIsWhiteInCheck() {
+bool const Chessboard::getIsWhiteInCheck() {
     return isWhiteInCheck;
 }
 
 // Getter for isBlackInCheck
-const bool Chessboard::getIsBlackInCheck() {
+bool const Chessboard::getIsBlackInCheck() {
     return isBlackInCheck;
 }
 
 // Getter for isWhiteInCheckmate
-const bool Chessboard::getIsWhiteInCheckmate() {
+bool const Chessboard::getIsWhiteInCheckmate() {
     return isWhiteInCheckmate;
 }
 
 // Getter for isBlackInCheckmate
-const bool Chessboard::getIsBlackInCheckmate() {
+bool const Chessboard::getIsBlackInCheckmate() {
     return isBlackInCheckmate;
 }
 
 // Getter for isStalemate
-const bool Chessboard::getIsStalemate() {
+bool const Chessboard::getIsStalemate() {
     return isStalemate;
 }
 
 // Getter for whiteValidMoves
-const std::map<std::pair<std::pair<int,int>, std::pair <int,int>>, int> Chessboard::getWhiteValidMoves() {
+std::map<std::pair<std::pair<int,int>, std::pair <int,int>>, int> const Chessboard::getWhiteValidMoves() {
     return whiteValidMoves;
 }
 
 // Getter for blackValidMoves
-const std::map<std::pair<std::pair<int,int>, std::pair <int,int>>, int> Chessboard::getBlackValidMoves() {
+std::map<std::pair<std::pair<int,int>, std::pair <int,int>>, int> const Chessboard::getBlackValidMoves() {
     return blackValidMoves;
 }
 
@@ -1041,22 +1041,12 @@ bool Chessboard::validPromotion(std::string promotion) {
 
 // Clears the board
 void Chessboard::deleteBoard() {
-    for(int i = 0; i < 8; i++) {
-        for(int j = 0; j < 8; j++) {
-            if(board[i][j] != nullptr) {
-                std::cout << board[i][j]->type << " at " << i << " " << j << std::endl;
-            }
-        }
-    }
     Piece *temp;
     for(int i = 0; i < 8; i++) {
         for(int j = 0; j < 8; j++) {
             if(board[i][j] != nullptr) {
-                std::cout<< "deleting " << i << " " << j << std::endl; 
-                temp = board[i][j];
-                //delete board[i][j];
+                delete board[i][j];
                 board[i][j] = nullptr;
-                delete temp;
             }
         }
     }
