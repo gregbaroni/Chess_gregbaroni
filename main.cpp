@@ -104,6 +104,7 @@ int main() {
             cout << "Stalemate" << endl;
         }
     }
+
     // Versus AI
     else {
         do {
@@ -140,7 +141,6 @@ int main() {
         }
 
         ChessAI AI(aiColor);
-
 
         while(!chessboard.getIsWhiteInCheckmate() && !chessboard.getIsBlackInCheckmate() && !chessboard.getIsStalemate()) {
             chessboard.printBoard();
@@ -226,6 +226,7 @@ int main() {
 
     return 0;
 }
+
 
 
 // Checks to see if the user inputted either "2p" or "ai"
