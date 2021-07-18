@@ -190,7 +190,7 @@ void Chessboard::printBoard() {
         }
         std::cout << std::endl;
     }
-    std::cout << "     ——————————————————————" << std::endl;
+    std::cout << "     ______________________" << std::endl;
     std::string alphabet = "abcdefgh";
     std::cout << "    ";
     for(int i = 0; i < 8; i++) {
