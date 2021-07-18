@@ -137,10 +137,10 @@ std::pair<std::pair<std::pair<int,int>, std::pair <int,int>>, int> ChessAI::minM
         int maxValue = 0;
         for(std::map<std::pair<std::pair<int,int>, std::pair <int,int>>, int>::iterator it = validMoves.begin(); it != validMoves.end(); it++) {
             Chessboard tempBoard = board;
-            tempBoard.move(color, it->first.first, it->first.second);
+            tempBoard.move(color, it->first.first, it->first.second, true);
             value = getValueOfBoard(tempBoard);
 
-            if(depth + 1 < 3 && value >= currentValue) {
+            if((depth + 1 < 3 && value > currentValue) || (depth + 1 < 2 && value >= currentValue)) {
                 minMaxResult = minMax(tempBoard, depth + 1, currentValue);
                 value = minMaxResult.second;
             }
@@ -165,10 +165,10 @@ std::pair<std::pair<std::pair<int,int>, std::pair <int,int>>, int> ChessAI::minM
         int minValue = 0;
         for(std::map<std::pair<std::pair<int,int>, std::pair <int,int>>, int>::iterator it = validMoves.begin(); it != validMoves.end(); it++) {
             Chessboard tempBoard = board;
-            tempBoard.move(playerColor, it->first.first, it->first.second);
+            tempBoard.move(playerColor, it->first.first, it->first.second, true);
             value = getValueOfBoard(tempBoard);
 
-            if(depth + 1 < 3 and value <= currentValue) {
+            if((depth + 1 < 3 && value < currentValue) || (depth + 1 < 2 && value <= currentValue)) {
                 minMaxResult = minMax(tempBoard, depth + 1, currentValue);
                 value = minMaxResult.second;
             }

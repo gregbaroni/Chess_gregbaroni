@@ -61,7 +61,7 @@ public:
     Chessboard& operator=(const Chessboard& source);
     void printBoard();
     bool validSpace(std::string space, int s);
-    bool move(std::string player, std::pair<int,int> startSpace, std::pair<int,int> endSpace);
+    bool move(std::string player, std::pair<int,int> startSpace, std::pair<int,int> endSpace, bool aiTurn);
     void calculateBoardState(std::string player);
     void calculatePossibleMoves();
     void calculateKingStates(std::string player);

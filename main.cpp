@@ -82,7 +82,7 @@ int main() {
                 while(!valid);
                 startCoords = convertFromBoardSpaceToCoords(startSpace);
                 endCoords = convertFromBoardSpaceToCoords(endSpace);
-                valid = chessboard.move(player, startCoords, endCoords);
+                valid = chessboard.move(player, startCoords, endCoords, false);
                 cin.clear();
                 cin.ignore(numeric_limits<std::streamsize>::max(), '\n');
             }
@@ -185,7 +185,7 @@ int main() {
                     while(!valid);
                     startCoords = convertFromBoardSpaceToCoords(startSpace);
                     endCoords = convertFromBoardSpaceToCoords(endSpace);
-                    valid = chessboard.move(player, startCoords, endCoords);
+                    valid = chessboard.move(player, startCoords, endCoords, false);
                     cin.clear();
                     cin.ignore(numeric_limits<std::streamsize>::max(), '\n');
                 }
@@ -195,13 +195,14 @@ int main() {
 
             // AI's turn
             else if(aiTurn) {
+                cout << "The AI is thinking..." << endl;
                 move = AI.getNextMove(chessboard);
                 startCoords = move.first;
                 endCoords = move.second;
                 startSpace = convertFromCoordsToBoardSpace(startCoords);
                 endSpace = convertFromCoordsToBoardSpace(endCoords);
                 cout << "The AI's move is: " << startSpace << " " << endSpace << endl;
-                chessboard.move(aiColor, startCoords, endCoords);
+                chessboard.move(aiColor, startCoords, endCoords, true);
                 cout<<endl;
             }
 

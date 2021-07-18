@@ -247,7 +247,8 @@ bool Chessboard::validSpace(std::string space, int s) {
 // Function for carrying out a player's move
 // Input is the color of the piece that is moving, and the start space and endspace
 // Start space and end space are strings of the form "e3" or "a6"
-bool Chessboard::move(std::string player, std::pair<int,int> startSpace, std::pair<int,int> endSpace) {
+// aiTurn is a boolean value to determine if the move belongs to a player or to the ai
+bool Chessboard::move(std::string player, std::pair<int,int> startSpace, std::pair<int,int> endSpace, bool aiTurn) {
     // convert start space and end space to numbers
     int x_startSpace, y_startSpace;
     int x_endSpace, y_endSpace;
@@ -262,63 +263,65 @@ bool Chessboard::move(std::string player, std::pair<int,int> startSpace, std::pa
     std::pair<std::pair<int,int>, std::pair <int,int>> move = std::make_pair(startCoords, endCoords);
 
     // Check to see if move is valid
-    if(p == nullptr) {
-        std::cout << "Illegal move: there is no piece on that square" << std::endl;
-        return false;
-    }
-    if(p->color != player) {
-        std::cout << "Illegal move: that piece does not belong to you" << std::endl;
-        return false;
-    }
-    if(player == "white") {
-        if(whitePossibleMoves.find(move) == whitePossibleMoves.end()) {
-            // Check if the player is attempting to castle
-            if(p->type == "king") {
-                if(x_startSpace == 4 && y_startSpace == 0) {
-                    if((x_endSpace == 6 && y_endSpace == 0) ||(x_endSpace == 2 && y_endSpace == 0)) {
-                        std::cout << "Illegal move: the king is unable to castle" << std::endl;
-                        return false;
-                    }
-                }               
-            }
-            std::cout << "Illegal move: that piece is unable to move to that space" << std::endl;
+    if(!aiTurn) {
+        if(p == nullptr) {
+            std::cout << "Illegal move: there is no piece on that square" << std::endl;
             return false;
         }
-        // Move is possible but not legal
-        if(whiteValidMoves.find(move) == whiteValidMoves.end()) {
-            if(isWhiteInCheck) {
-                std::cout << "Illegal move: your king is in Check" << std::endl;
-                return false;
-            }
-            else {
-                std::cout << "Illegal move: that move puts your king in Check" << std::endl;
-                return false;
-            }
-        }
-    }
-    else {
-        if(blackPossibleMoves.find(move) == blackPossibleMoves.end()) {
-            // Check if the player is attempting to castle
-            if(p->type == "king") {
-                if(x_startSpace == 4 && y_startSpace == 7) {
-                    if((x_endSpace == 6 && y_endSpace == 7) ||(x_endSpace == 2 && y_endSpace == 7)) {
-                        std::cout << "Illegal move: the king is unable to castle" << std::endl;
-                        return false;
-                    }
-                }           
-            }
-            std::cout << "Illegal move: that piece is unable to move to that space" << std::endl;
+        if(p->color != player) {
+            std::cout << "Illegal move: that piece does not belong to you" << std::endl;
             return false;
         }
-        // Move is possible but not legal
-        if(blackValidMoves.find(move) == blackValidMoves.end()) {
-            if(isBlackInCheck) {
-                std::cout << "Illegal move: your king is in Check" << std::endl;
+        if(player == "white") {
+            if(whitePossibleMoves.find(move) == whitePossibleMoves.end()) {
+                // Check if the player is attempting to castle
+                if(p->type == "king") {
+                    if(x_startSpace == 4 && y_startSpace == 0) {
+                        if((x_endSpace == 6 && y_endSpace == 0) ||(x_endSpace == 2 && y_endSpace == 0)) {
+                            std::cout << "Illegal move: the king is unable to castle" << std::endl;
+                            return false;
+                        }
+                    }               
+                }
+                std::cout << "Illegal move: that piece is unable to move to that space" << std::endl;
                 return false;
             }
-            else {
-                std::cout << "Illegal move: that move puts your king in Check" << std::endl;
+            // Move is possible but not legal
+            if(whiteValidMoves.find(move) == whiteValidMoves.end()) {
+                if(isWhiteInCheck) {
+                    std::cout << "Illegal move: your king is in Check" << std::endl;
+                    return false;
+                }
+                else {
+                    std::cout << "Illegal move: that move puts your king in Check" << std::endl;
+                    return false;
+                }
+            }
+        }
+        else {
+            if(blackPossibleMoves.find(move) == blackPossibleMoves.end()) {
+                // Check if the player is attempting to castle
+                if(p->type == "king") {
+                    if(x_startSpace == 4 && y_startSpace == 7) {
+                        if((x_endSpace == 6 && y_endSpace == 7) ||(x_endSpace == 2 && y_endSpace == 7)) {
+                            std::cout << "Illegal move: the king is unable to castle" << std::endl;
+                            return false;
+                        }
+                    }           
+                }
+                std::cout << "Illegal move: that piece is unable to move to that space" << std::endl;
                 return false;
+            }
+            // Move is possible but not legal
+            if(blackValidMoves.find(move) == blackValidMoves.end()) {
+                if(isBlackInCheck) {
+                    std::cout << "Illegal move: your king is in Check" << std::endl;
+                    return false;
+                }
+                else {
+                    std::cout << "Illegal move: that move puts your king in Check" << std::endl;
+                    return false;
+                }
             }
         }
     }
@@ -428,8 +431,13 @@ bool Chessboard::move(std::string player, std::pair<int,int> startSpace, std::pa
     // Pawn promotion
     if(wasPromoted) {
         do {
-            std::cout << "Choose the pawn's promotion: ";
-            std::cin >> promotion;
+            if(!aiTurn) {
+                std::cout << "Choose the pawn's promotion: ";
+                std::cin >> promotion;
+            }
+            else {
+                promotion = "queen";
+            }
             for(int i = 0; i < promotion.length(); i++) {
                 promotion[i] = tolower(promotion[i]);
             }
