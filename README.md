@@ -21,12 +21,12 @@ Once the game starts, you will be presented with a board like this:
 
 
 The letters on the board indicate the different pieces.
-p / P = pawn
-r / R = rook
-n / N = knight
-b / B = bishop
-q / Q = queen
-k / K = king
+-p / P = pawn
+-r / R = rook
+-n / N = knight
+-b / B = bishop
+-q / Q = queen
+-k / K = king
 
 The lowercase letters represent the white pieces and the uppercase letters represent the black pieces.
 
