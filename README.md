@@ -6,7 +6,7 @@ A project coded in C++ that allows you to play chess against another person or a
 
 ## How to Compile
 
-If you are using a Mac or Linux you should be able to download the repository and compile the executable by typing "make chess". By default, the makefile will use g++ to compile, but you can change this to gcc by changing CXX to gcc.
+If you are using a Mac or Linux you should be able to download the repository and compile the executable by typing "make chess" without quotations at the command line. By default, the makefile will use g++ to compile, but you can change this to gcc by changing CXX to gcc.
 
 If you are using windows you will need to manually compile the files chessboard.cpp, chessAI.cpp, and main.cpp into an executable.
 
