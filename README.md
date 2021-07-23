@@ -18,6 +18,7 @@ If you choose AI, you will then be asked whether you want to play as white or bl
 
 Once the game starts, you will be presented with a board like this:
 
+<pre>
  8 | R  N  B  Q  K  B  N  R
  7 | P  P  P  P  P  P  P  P
  6 | *  *  *  *  *  *  *  *
@@ -28,6 +29,8 @@ Once the game starts, you will be presented with a board like this:
  1 | r  n  b  q  k  b  n  r
      ––––––––––––––––––––––
      a  b  c  d  e  f  g  h
+</pre>
+
 
 The letters on the board indicate the different pieces.
 - p / P = pawn
@@ -40,4 +43,5 @@ The letters on the board indicate the different pieces.
 The lowercase letters represent the white pieces and the uppercase letters represent the black pieces.
 
 To perform a move, type the start coordinate followed by the end coordinate.
-So, to move the pawn at e2 up two spaces, you would type "e2 e4" without quotations and press enter.
+So, to move the pawn at e2 up two spaces, you would type 
+"e2 e4" without quotations and press enter.
