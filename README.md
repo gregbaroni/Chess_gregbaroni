@@ -18,7 +18,16 @@ If you choose AI, you will then be asked whether you want to play as white or bl
 
 Once the game starts, you will be presented with a board like this:
 
-
+ 8 | R  N  B  Q  K  B  N  R
+ 7 | P  P  P  P  P  P  P  P
+ 6 | *  *  *  *  *  *  *  *
+ 5 | *  *  *  *  *  *  *  *
+ 4 | *  *  *  *  *  *  *  *
+ 3 | *  *  *  *  *  *  *  *
+ 2 | p  p  p  p  p  p  p  p
+ 1 | r  n  b  q  k  b  n  r
+     ––––––––––––––––––––––
+     a  b  c  d  e  f  g  h
 
 The letters on the board indicate the different pieces.
 - p / P = pawn
